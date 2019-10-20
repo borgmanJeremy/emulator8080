@@ -16,7 +16,7 @@ class EmulatorConan(ConanFile):
 
     def requirements(self):
         self.requires("cxxopts/v2.2.0")
-
+        self.requires("Catch2/2.10.2@catchorg/stable")
 
     def build(self):
         cmake = CMake(self)

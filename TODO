@@ -1,0 +1,6 @@
+# TODO List
+- Figure out the best way to strucutre the code to compile with -Wconversion and -Wsign-conversion
+- Update unit tests to make sure no functions have side effects
+- Update unit tests to have less copy and paste. Maybe put a pointer to each register in a vector and loop through a solution vector.
+- Write Curses interface to display register / flag status, stack, and surrounding instructions
+- Import hardware test software
