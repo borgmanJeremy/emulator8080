@@ -14,14 +14,22 @@ class EmulatorConan(ConanFile):
     default_options = {"shared": False}
     generators = "cmake"
 
+
+    def configure(self):
+        self.options["SDL2"].sdl2main = False 
+
     def requirements(self):
         self.requires("cxxopts/v2.2.0")
-        self.requires("Catch2/2.10.2@catchorg/stable")
+        self.requires("Catch2/2.11.0@catchorg/stable")
+        self.requires("sdl2/2.0.10@bincrafters/stable")
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions["FMT_HEADER_ONLY"] = False
+        cmake.definitions["FMT_HEADER_ONLY"] = False
         cmake.configure(source_folder="emulator")
         cmake.build()
+
     def package(self):
         self.copy("*.h", dst="include", src="hello")
         self.copy("*hello.lib", dst="lib", keep_path=False)

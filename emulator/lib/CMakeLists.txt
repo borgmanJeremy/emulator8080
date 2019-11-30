@@ -20,6 +20,7 @@ target_sources(cpu_8080
 target_include_directories(cpu_8080 PRIVATE 
     ${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
+
 target_add_code_coverage(cpu_8080 ../bin/test_8080)
 target_compile_options(cpu_8080 PRIVATE -Wall -Wextra -Wshadow -Wpedantic)
 target_compile_features(cpu_8080 PRIVATE cxx_std_17)

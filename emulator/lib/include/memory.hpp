@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+
 namespace smart_memory
 {
 enum class MemoryAttribute
@@ -170,15 +171,19 @@ unsigned int Memory<T>::findSegmentIndex(unsigned int address) const
     }
     base += memory_layout[i].size;
   }
-  throw std::runtime_error("Memory Segment not found.");
+  throw std::runtime_error("Memory Segment not found when looking for addr: " +
+                           std::to_string(address));
 }
 
 template <class T>
 T Memory<T>::readMemory(unsigned int address) const
 {
+  // TODO: add test for last element access
   if (address >= raw_memory_.size())
   {
-    throw std::runtime_error("Memory access out of bounds");
+    std::string error_msg =
+      "Memory access out of bounds at addr: " + std::to_string(address);
+    throw std::runtime_error(error_msg);
   }
 
   if (memory_layout.at(findSegmentIndex(address)).mem_attribute ==
@@ -195,13 +200,19 @@ void Memory<T>::writeMemory(unsigned int address, T value)
 {
   if (address >= raw_memory_.size())
   {
-    throw std::runtime_error("Memory access out of bounds");
+    // TODO: add test for last element access
+    std::string error_msg =
+      "Memory access out of bounds at addr: " + std::to_string(address);
+    throw std::runtime_error(error_msg);
   }
 
   if (memory_layout.at(findSegmentIndex(address)).mem_attribute ==
       MemoryAttribute::READ_ONLY)
   {
-    throw std::runtime_error("Memory is Read Only");
+    std::string error_msg =
+      "Memory is Read Only at addr: " + std::to_string(address);
+    // std::cout << error_msg << "\n";
+    throw std::runtime_error(error_msg);
   }
 
   raw_memory_[address] = value;

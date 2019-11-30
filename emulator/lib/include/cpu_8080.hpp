@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include "memory.hpp"
+#include "smart_counter.hpp"
 
 struct Instruction
 {
@@ -62,10 +63,17 @@ class Cpu_8080
   std::vector<Instruction> instruction_set_;
   Registers reg_;
   Flags flags_;
+  std::vector<uint8_t> output_port_;
+  std::vector<uint8_t> input_port_;
+
   smart_memory::Memory<uint8_t> memory_;
+  uint8_t int_enable_;
+
+  unsigned long int cycle_count_;
+  // SmartCounter<unsigned long int> cycle_count_;
 
  private:
-  uint8_t int_enable_;
+  static constexpr unsigned int port_size_ = 8;
 
   void addRegToRegA(uint8_t to_add);
   void addRegToRegAWithCarry(uint8_t to_add);
@@ -86,6 +94,7 @@ class Cpu_8080
   void setSignFlag(uint16_t result);
   void setCarryFlag(uint16_t result);
   void setParityFlag(uint16_t result);
+  void setAuxFlag(uint8_t result);
 
   void addMathAddOperations();
   void addMathSubOperations();

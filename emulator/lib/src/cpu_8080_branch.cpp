@@ -18,53 +18,73 @@ void Cpu_8080::callRetOnStack()
   reg_.pc = jump_addr;
 }
 
-void Cpu_8080::resetRetOnStack(unsigned int return_address)
+void Cpu_8080::resetRetOnStack(unsigned int reset_addr)
 {
   auto return_addr = reg_.pc + 1;
 
   pushToStack(static_cast<uint8_t>((return_addr & 0xFF00) >> 8));
   pushToStack(static_cast<uint8_t>((return_addr & 0xFF)));
-  reg_.pc = return_address;
+  reg_.pc = reset_addr;
 }
 void Cpu_8080::addBranchOperations()
 {
   // Resets
-  instruction_set_.emplace_back(
-    Instruction{0xC7, 0, "RST 0", [this]() { resetRetOnStack(0x00); }});
+  instruction_set_.emplace_back(Instruction{0xC7, 0, "RST 0", [this]() {
+                                              resetRetOnStack(0x00);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xCF, 0, "RST 1", [this]() { resetRetOnStack(0x08); }});
+  instruction_set_.emplace_back(Instruction{0xCF, 0, "RST 1", [this]() {
+                                              resetRetOnStack(0x08);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xd7, 0, "RST 2", [this]() { resetRetOnStack(0x10); }});
+  instruction_set_.emplace_back(Instruction{0xd7, 0, "RST 2", [this]() {
+                                              resetRetOnStack(0x10);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xdf, 0, "RST 3", [this]() { resetRetOnStack(0x18); }});
+  instruction_set_.emplace_back(Instruction{0xdf, 0, "RST 3", [this]() {
+                                              resetRetOnStack(0x18);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xe7, 0, "RST 4", [this]() { resetRetOnStack(0x20); }});
+  instruction_set_.emplace_back(Instruction{0xe7, 0, "RST 4", [this]() {
+                                              resetRetOnStack(0x20);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xef, 0, "RST 5", [this]() { resetRetOnStack(0x28); }});
+  instruction_set_.emplace_back(Instruction{0xef, 0, "RST 5", [this]() {
+                                              resetRetOnStack(0x28);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xf7, 0, "RST 6", [this]() { resetRetOnStack(0x30); }});
+  instruction_set_.emplace_back(Instruction{0xf7, 0, "RST 6", [this]() {
+                                              resetRetOnStack(0x30);
+                                              cycle_count_ += 11;
+                                            }});
 
-  instruction_set_.emplace_back(
-    Instruction{0xff, 0, "RST 7", [this]() { resetRetOnStack(0x38); }});
+  instruction_set_.emplace_back(Instruction{0xff, 0, "RST 7", [this]() {
+                                              resetRetOnStack(0x38);
+                                              cycle_count_ += 11;
+                                            }});
 
   // Calls
-  instruction_set_.emplace_back(
-    Instruction{0xCD, 2, "CALL adr", [this]() { callRetOnStack(); }});
+  instruction_set_.emplace_back(Instruction{0xCD, 2, "CALL adr", [this]() {
+                                              callRetOnStack();
+                                              cycle_count_ += 17;
+                                            }});
 
   instruction_set_.emplace_back(Instruction{0xC4, 2, "CNZ adr", [this]() {
                                               if (flags_.z == 0)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -72,10 +92,13 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.z == 1)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
+
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -83,10 +106,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.cy == 0)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -94,10 +119,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.cy == 1)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -105,10 +132,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.p == 0)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -116,10 +145,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.p == 1)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -127,10 +158,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.s == 0)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -138,25 +171,31 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.s == 1)
                                               {
                                                 callRetOnStack();
+                                                cycle_count_ += 17;
                                               }
                                               else
                                               {
                                                 reg_.pc += 3;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
   // Returns
-  instruction_set_.emplace_back(
-    Instruction{0xC9, 0, "RET", [this]() { returnSP(); }});
+  instruction_set_.emplace_back(Instruction{0xC9, 0, "RET", [this]() {
+                                              returnSP();
+                                              cycle_count_ += 10;
+                                            }});
 
   instruction_set_.emplace_back(Instruction{0xC0, 0, "RNZ", [this]() {
                                               if (flags_.z == 0)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -164,10 +203,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.z == 1)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -175,10 +216,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.cy == 0)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -186,10 +229,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.cy == 1)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -197,10 +242,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.p == 0)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -208,10 +255,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.p == 1)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -219,10 +268,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.s == 0)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 11;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 5;
                                               }
                                             }});
 
@@ -230,10 +281,12 @@ void Cpu_8080::addBranchOperations()
                                               if (flags_.s == 1)
                                               {
                                                 returnSP();
+                                                cycle_count_ += 5;
                                               }
                                               else
                                               {
                                                 reg_.pc += 1;
+                                                cycle_count_ += 11;
                                               }
                                             }});
 
@@ -241,12 +294,14 @@ void Cpu_8080::addBranchOperations()
   instruction_set_.emplace_back(Instruction{0xe9, 0, "PCHL", [this]() {
                                               auto addr = getAddressFromHL();
                                               reg_.pc = addr;
+                                              cycle_count_ += 5;
                                             }});
 
   instruction_set_.emplace_back(
     Instruction{0xC3, 2, "JMP adr", [this]() {
                   auto addr = getAddressFromTwoBytes(reg_.pc + 1);
                   reg_.pc = addr;
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -260,6 +315,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -273,6 +329,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -286,6 +343,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -299,6 +357,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -312,6 +371,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -325,6 +385,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -338,6 +399,7 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 
   instruction_set_.emplace_back(
@@ -351,5 +413,6 @@ void Cpu_8080::addBranchOperations()
                   {
                     reg_.pc += 3;
                   }
+                  cycle_count_ += 10;
                 }});
 }

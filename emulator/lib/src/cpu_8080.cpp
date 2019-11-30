@@ -2,29 +2,24 @@
 
 Cpu_8080::Cpu_8080()
 {
-  int_enable_ = 1;
+  int_enable_ = 0;
+  // cycle_count_.setLimit(100'000);
 
-  instruction_set_.emplace_back(
-    Instruction{0, 0, "NOP", [this]() { reg_.pc += 1; }});
+  input_port_.resize(port_size_);
+  std::fill(input_port_.begin(), input_port_.end(), 0);
+  input_port_[0] = 0x0E;
+  input_port_[1] = 0x09;
+
+  output_port_.resize(port_size_);
+  std::fill(output_port_.begin(), output_port_.end(), 0);
+
+  instruction_set_.emplace_back(Instruction{0, 0, "NOP", [this]() {
+                                              cycle_count_ += 4;
+                                              reg_.pc += 1;
+                                            }});
 
   instruction_set_.emplace_back(Instruction{
     0x76, 0, "HLT",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xd3, 1, "OUT D8",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xdb, 1, "IN D8",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xf3, 0, "DI",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xfb, 0, "EI",
     [this]() { throw std::runtime_error("Illegal Instruction! "); }});
 
   addMathAddOperations();
@@ -48,6 +43,20 @@ Cpu_8080::Cpu_8080()
   //             << instruction_set[i].instruction << "\t"
   //             << std::to_string(instruction_set[i].num_args) << std::endl;
   // }
+}
+
+// This only checks the forth bit, so to correctly work the upper 4 bits should
+// be masked to zero before math operations
+void Cpu_8080::setAuxFlag(uint8_t result)
+{
+  if (result & (0x10))
+  {
+    flags_.ac = 1;
+  }
+  else
+  {
+    flags_.ac = 1;
+  }
 }
 
 void Cpu_8080::setZeroFlag(uint16_t result)

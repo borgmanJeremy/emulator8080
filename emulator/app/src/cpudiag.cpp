@@ -47,9 +47,9 @@ int main(int argc, char** argv)
   }
   file.close();
   // Skip DAA test
-  program_data[0x59c] = 0xc3;  // JMP
-  program_data[0x59d] = 0xc2;
-  program_data[0x59e] = 0x05;
+  // program_data[0x59c] = 0xc3;  // JMP
+  // program_data[0x59d] = 0xc2;
+  // program_data[0x59e] = 0x05;
 
   Cpu_8080 cpu;
   cpu.memory_.pushSegment(
@@ -64,19 +64,28 @@ int main(int argc, char** argv)
   {
     if (cpu.memory_[cpu.reg_.pc] == 0xCD)
     {
-      if (cpu.reg_.c == 9)
+      if (5 == (((cpu.memory_[cpu.reg_.pc + 2]) << 8) |
+                (cpu.memory_[cpu.reg_.pc + 1])))
       {
-        uint16_t offset = (cpu.reg_.d << 8) | (cpu.reg_.e);
-
-        uint16_t start_byte = offset + 3;
-        uint16_t count = 0;
-        while (static_cast<char>(cpu.memory_[start_byte + count]) != '$')
+        if (cpu.reg_.c == 9)
         {
-          count++;
-          printf("%c", static_cast<char>(cpu.memory_[start_byte + count]));
+          uint16_t offset = (cpu.reg_.d << 8) | (cpu.reg_.e);
+
+          uint16_t start_byte = offset + 3;
+          uint16_t count = 0;
+          while (static_cast<char>(cpu.memory_[start_byte + count]) != '$')
+          {
+            count++;
+            printf("%c", static_cast<char>(cpu.memory_[start_byte + count]));
+          }
+          printf("\n");
         }
-        printf("\n");
       }
+    }
+    else if (0 == (((cpu.memory_[cpu.reg_.pc + 2]) << 8) |
+                   (cpu.memory_[cpu.reg_.pc + 1])))
+    {
+      // exit(0);
     }
     std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
               << std::endl;
