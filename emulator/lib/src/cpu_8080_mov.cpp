@@ -567,4 +567,14 @@ void Cpu_8080::addMoveOperations()
                                               reg_.sp = getAddressFromHL();
                                               reg_.pc++;
                                             }});
+
+  instruction_set_.emplace_back(Instruction{0xd3, 1, "OUT D8", [this]() {
+                                              port_[reg_.pc + 1] = reg_.a;
+                                              reg_.pc += 2;
+                                            }});
+
+  instruction_set_.emplace_back(Instruction{0xdb, 1, "IN D8", [this]() {
+                                              reg_.a = port_[reg_.pc + 1];
+                                              reg_.pc += 2;
+                                            }});
 }

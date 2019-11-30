@@ -74,6 +74,7 @@ TEST_CASE("Memory Operators", "[type]")
     REQUIRE(memory.readMemory(0x20) == 0x42);
 
     REQUIRE_THROWS_AS(memory[0x0] = 1, std::runtime_error);
+    REQUIRE_THROWS_AS(memory[0x60] = 1, std::runtime_error);
     REQUIRE_THROWS_AS(memory[0x80] = 1, std::runtime_error);
   }
   SECTION("Operator Read")

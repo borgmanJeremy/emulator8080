@@ -2,6 +2,16 @@
 
 void Cpu_8080::addRegMisc()
 {
+  instruction_set_.emplace_back(Instruction{0xf3, 0, "DI", [this]() {
+                                              int_enable_ = 0;
+                                              reg_.pc++;
+                                            }});
+
+  instruction_set_.emplace_back(Instruction{0xfb, 0, "EI", [this]() {
+                                              int_enable_ = 1;
+                                              reg_.pc++;
+                                            }});
+
   // Rotates
   instruction_set_.emplace_back(
     Instruction{7, 0, "RLC", [this]() {

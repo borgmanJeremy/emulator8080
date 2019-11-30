@@ -3,28 +3,14 @@
 Cpu_8080::Cpu_8080()
 {
   int_enable_ = 1;
+  port_.resize(port_size_);
+  std::fill(port_.begin(), port_.end(), 0);
 
   instruction_set_.emplace_back(
     Instruction{0, 0, "NOP", [this]() { reg_.pc += 1; }});
 
   instruction_set_.emplace_back(Instruction{
     0x76, 0, "HLT",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xd3, 1, "OUT D8",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xdb, 1, "IN D8",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xf3, 0, "DI",
-    [this]() { throw std::runtime_error("Illegal Instruction! "); }});
-
-  instruction_set_.emplace_back(Instruction{
-    0xfb, 0, "EI",
     [this]() { throw std::runtime_error("Illegal Instruction! "); }});
 
   addMathAddOperations();
