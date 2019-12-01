@@ -29,7 +29,45 @@ void append_from_file(std::string const &file_name,
   file.close();
 }
 
-void processKeyboard() {}
+bool processKeyboard(SDL_Event &event)
+{
+  bool quit = false;
+  switch (event.type)
+  {
+    case SDL_QUIT:
+    {
+      quit = true;
+      break;
+    }
+    case SDL_KEYDOWN:
+      switch (event.key.keysym.sym)
+      {
+        case SDLK_LEFT:
+        {
+          std::cout << "left\n";
+
+          break;
+        }
+        case SDLK_RIGHT:
+        {
+          std::cout << "right\n";
+          break;
+        }
+        case SDLK_UP:
+        {
+          std::cout << "up\n";
+          break;
+        }
+        case SDLK_DOWN:
+        {
+          std::cout << "down\n";
+          break;
+        }
+      }
+      break;
+  }
+  return quit;
+}
 int main()
 {
   std::vector<std::string> paths_to_files = {
@@ -77,41 +115,12 @@ int main()
   {
     SDL_UpdateTexture(texture, NULL, pixels, screen_width * sizeof(Uint32));
 
-    // Need a non blocking way to do this
+    // TODO: Need a non blocking way to do this, i think using wait instead of
+    // poll and then using keyup / keydown to set port state will work better
     SDL_WaitEvent(&event);
 
-    switch (event.type)
-    {
-      case SDL_QUIT:
-        quit = true;
-        break;
-      case SDL_KEYDOWN:
-        switch (event.key.keysym.sym)
-        {
-          case SDLK_LEFT:
-          {
-            std::cout << "left\n";
-
-            break;
-          }
-          case SDLK_RIGHT:
-          {
-            std::cout << "right\n";
-            break;
-          }
-          case SDLK_UP:
-          {
-            std::cout << "up\n";
-            break;
-          }
-          case SDLK_DOWN:
-          {
-            std::cout << "down\n";
-            break;
-          }
-        }
-        break;
-    }
+    // TODO: Maybe use std::variant for this
+    quit = processKeyboard(event);
 
     cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
     // std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
@@ -123,6 +132,7 @@ int main()
   }
 
   // cleanup SDL
+  // TODO: RAII method for this?
   delete[] pixels;
   SDL_DestroyTexture(texture);
   SDL_DestroyRenderer(renderer);
