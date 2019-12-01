@@ -209,7 +209,10 @@ void Memory<T>::writeMemory(unsigned int address, T value)
   if (memory_layout.at(findSegmentIndex(address)).mem_attribute ==
       MemoryAttribute::READ_ONLY)
   {
-    throw std::runtime_error("Memory is Read Only");
+    std::string error_msg =
+      "Memory is Read Only at addr: " + std::to_string(address);
+    std::cout << error_msg << "\n";
+    // throw std::runtime_error(error_msg);
   }
 
   raw_memory_[address] = value;

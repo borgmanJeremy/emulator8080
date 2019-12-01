@@ -2,9 +2,11 @@
 
 Cpu_8080::Cpu_8080()
 {
-  int_enable_ = 1;
+  int_enable_ = 0;
   port_.resize(port_size_);
   std::fill(port_.begin(), port_.end(), 0);
+  port_[0] = 0x0E;
+  port_[1] = 0x09;
 
   instruction_set_.emplace_back(
     Instruction{0, 0, "NOP", [this]() { reg_.pc += 1; }});

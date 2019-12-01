@@ -18,13 +18,13 @@ void Cpu_8080::callRetOnStack()
   reg_.pc = jump_addr;
 }
 
-void Cpu_8080::resetRetOnStack(unsigned int return_address)
+void Cpu_8080::resetRetOnStack(unsigned int reset_addr)
 {
   auto return_addr = reg_.pc + 1;
 
   pushToStack(static_cast<uint8_t>((return_addr & 0xFF00) >> 8));
   pushToStack(static_cast<uint8_t>((return_addr & 0xFF)));
-  reg_.pc = return_address;
+  reg_.pc = reset_addr;
 }
 void Cpu_8080::addBranchOperations()
 {

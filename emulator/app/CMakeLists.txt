@@ -44,11 +44,13 @@ add_executable(space_invaders)
 
 target_sources(space_invaders 
     PRIVATE 
+        "src/space_invaders_main.cpp"
         "src/space_invaders.cpp" 
         )
 target_include_directories(space_invaders PRIVATE 
     ${SDL2_INCLUDE_DIRS} 
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/
 )
 
 #TODO, understand what conanlibs is actually doing

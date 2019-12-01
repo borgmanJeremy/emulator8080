@@ -1,12 +1,7 @@
-#include <SDL.h>
-#include <array>
-#include <exception>
-#include <fstream>
-#include <iostream>
-#include <vector>
-#include "cpu_8080.hpp"
-void append_from_file(std::string const &file_name,
-                      std::vector<uint8_t> &program_data)
+#include "space_invaders.hpp"
+
+void appendFromFile(std::string const &file_name,
+                    std::vector<uint8_t> &program_data)
 {
   std::ifstream file(file_name, std::ifstream::binary);
 
@@ -29,7 +24,53 @@ void append_from_file(std::string const &file_name,
   file.close();
 }
 
-bool processKeyboard(SDL_Event &event)
+void configureMemory(Cpu_8080 &cpu, std::vector<std::string> paths_to_files)
+{
+  std::vector<uint8_t> program_data;
+  for (auto const &path : paths_to_files)
+  {
+    appendFromFile(path, program_data);
+  }
+
+  cpu.memory_.pushSegment(
+    {"rom", 0x2000, smart_memory::MemoryAttribute::READ_ONLY});
+  cpu.memory_.pushSegment(
+    {"ram", 0x400, smart_memory::MemoryAttribute::READ_WRITE});
+  cpu.memory_.pushSegment(
+    {"v_ram", 0x1C00, smart_memory::MemoryAttribute::READ_WRITE});
+  cpu.memory_.flashReadOnlySegment("rom", program_data);
+}
+
+void setBit(uint8_t &byte, uint8_t bit_pos) { byte |= (0x01 << bit_pos); }
+
+void clearBit(uint8_t &byte, uint8_t bit_pos) { byte &= ~(0x01 << bit_pos); }
+
+void updateCPUPorts(Cpu_8080 &cpu, std::map<std::string, KeyState> const &state)
+{
+  (state.at("player_1_shoot") == KeyState::PRESSED) ? setBit(cpu.port_[0], 4)
+                                                    : clearBit(cpu.port_[0], 4);
+
+  (state.at("player_1_left") == KeyState::PRESSED) ? setBit(cpu.port_[0], 5)
+                                                   : clearBit(cpu.port_[0], 5);
+
+  (state.at("player_1_right") == KeyState::PRESSED) ? setBit(cpu.port_[0], 6)
+                                                    : clearBit(cpu.port_[0], 6);
+}
+
+PlayerInput::PlayerInput()
+{
+  key_state_["player_1_start"] = KeyState::NOT_PRESSED;
+  key_state_["player_1_shoot"] = KeyState::NOT_PRESSED;
+  key_state_["player_1_left"] = KeyState::NOT_PRESSED;
+  key_state_["player_1_right"] = KeyState::NOT_PRESSED;
+
+  key_state_["player_2_start"] = KeyState::NOT_PRESSED;
+  key_state_["player_2_shoot"] = KeyState::NOT_PRESSED;
+  key_state_["player_2_left"] = KeyState::NOT_PRESSED;
+  key_state_["player_2_right"] = KeyState::NOT_PRESSED;
+}
+
+bool PlayerInput::processKeyboardEvent(SDL_Event &event)
 {
   bool quit = false;
   switch (event.type)
@@ -39,28 +80,62 @@ bool processKeyboard(SDL_Event &event)
       quit = true;
       break;
     }
+
     case SDL_KEYDOWN:
       switch (event.key.keysym.sym)
       {
         case SDLK_LEFT:
         {
-          std::cout << "left\n";
-
+          key_state_["player_1_left"] = KeyState::PRESSED;
+          std::cout << "left down\n";
           break;
         }
         case SDLK_RIGHT:
         {
-          std::cout << "right\n";
+          key_state_["player_1_right"] = KeyState::PRESSED;
+          std::cout << "rght down\n";
           break;
         }
-        case SDLK_UP:
+        case SDLK_SPACE:
         {
-          std::cout << "up\n";
+          key_state_["player_1_space"] = KeyState::PRESSED;
+          std::cout << "space down\n";
           break;
         }
-        case SDLK_DOWN:
+        case SDLK_RETURN:
         {
-          std::cout << "down\n";
+          key_state_["player_1_start"] = KeyState::PRESSED;
+          std::cout << "Enter Down\n";
+          break;
+        }
+      }
+      break;
+
+    case SDL_KEYUP:
+      switch (event.key.keysym.sym)
+      {
+        case SDLK_LEFT:
+        {
+          key_state_["player_1_left"] = KeyState::NOT_PRESSED;
+          std::cout << "left up\n";
+          break;
+        }
+        case SDLK_RIGHT:
+        {
+          key_state_["player_1_right"] = KeyState::NOT_PRESSED;
+          std::cout << "rght up\n";
+          break;
+        }
+        case SDLK_SPACE:
+        {
+          key_state_["player_1_space"] = KeyState::NOT_PRESSED;
+          std::cout << "space up\n";
+          break;
+        }
+        case SDLK_RETURN:
+        {
+          key_state_["player_1_start"] = KeyState::NOT_PRESSED;
+          std::cout << "Enter up\n";
           break;
         }
       }
@@ -68,103 +143,3 @@ bool processKeyboard(SDL_Event &event)
   }
   return quit;
 }
-int main()
-{
-  std::vector<std::string> paths_to_files = {
-    "/home/jeremy/emulator8080/emulator/resource/invaders.h",
-    "/home/jeremy/emulator8080/emulator/resource/invaders.g",
-    "/home/jeremy/emulator8080/emulator/resource/invaders.f",
-    "/home/jeremy/emulator8080/emulator/resource/invaders.e",
-  };
-
-  std::vector<uint8_t> program_data;
-  for (auto const &path : paths_to_files)
-  {
-    append_from_file(path, program_data);
-  }
-
-  Cpu_8080 cpu;
-  cpu.memory_.pushSegment(
-    {"rom", 0x2000, smart_memory::MemoryAttribute::READ_ONLY});
-  cpu.memory_.pushSegment(
-    {"ram", 0x400, smart_memory::MemoryAttribute::READ_WRITE});
-  cpu.memory_.pushSegment(
-    {"v_ram", 0x1C00, smart_memory::MemoryAttribute::READ_WRITE});
-  cpu.memory_.flashReadOnlySegment("rom", program_data);
-
-  // Create Screen
-  SDL_Event event;
-  SDL_Init(SDL_INIT_VIDEO);
-  constexpr unsigned int screen_width = 256;
-  constexpr unsigned int screen_height = 224;
-  SDL_Window *window =
-    SDL_CreateWindow("SDL2 Keyboard/Mouse events", SDL_WINDOWPOS_UNDEFINED,
-                     SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, 0);
-
-  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
-  SDL_Texture *texture =
-    SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN,
-                      SDL_TEXTUREACCESS_STATIC, screen_width, screen_height);
-  Uint32 *pixels = new Uint32[screen_width * screen_height];
-
-  memset(pixels, 62, screen_width * screen_height * sizeof(Uint32));
-  bool quit = false;
-
-  // Emulator kernel: process IO, display, compute instructions, etc...
-  while (!quit)
-  {
-    SDL_UpdateTexture(texture, NULL, pixels, screen_width * sizeof(Uint32));
-
-    // TODO: Need a non blocking way to do this, i think using wait instead of
-    // poll and then using keyup / keydown to set port state will work better
-    SDL_WaitEvent(&event);
-
-    // TODO: Maybe use std::variant for this
-    quit = processKeyboard(event);
-
-    cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
-    // std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
-    //          << std::endl;
-
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
-  }
-
-  // cleanup SDL
-  // TODO: RAII method for this?
-  delete[] pixels;
-  SDL_DestroyTexture(texture);
-  SDL_DestroyRenderer(renderer);
-
-  SDL_DestroyWindow(window);
-  SDL_Quit();
-  return 0;
-}
-
-// Not ready for rendering code yet
-/*
-
-            for (unsigned int byte_count = 0;
-                 byte_count < screen_width * screen_height / 8; byte_count++)
-            {
-              if ((cpu.memory_[0x2000 + 0x400 + byte_count]) != 0)
-              {
-                std::cout << "something\n";
-              }
-
-              for (unsigned int bit = 0; bit < 8; bit++)
-              {
-                if (cpu.memory_[0x2000 + 0x400 + byte_count] & (0x01 << bit))
-                {
-                  pixels[byte_count * 8 + bit] = 255;
-                }
-
-                else
-                {
-                  pixels[byte_count * 8 + bit] = 0;
-                }
-              }
-            }
-
-*/

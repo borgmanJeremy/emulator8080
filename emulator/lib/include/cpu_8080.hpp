@@ -64,10 +64,10 @@ class Cpu_8080
   Flags flags_;
   std::vector<uint8_t> port_;
   smart_memory::Memory<uint8_t> memory_;
-
- private:
   uint8_t int_enable_;
-  static constexpr unsigned int port_size_ = 256;
+ 
+ private:
+  static constexpr unsigned int port_size_ = 8;
 
   void addRegToRegA(uint8_t to_add);
   void addRegToRegAWithCarry(uint8_t to_add);
