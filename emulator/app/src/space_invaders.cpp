@@ -1,10 +1,10 @@
+#include <SDL.h>
 #include <array>
 #include <exception>
 #include <fstream>
 #include <iostream>
 #include <vector>
 #include "cpu_8080.hpp"
-
 void append_from_file(std::string const &file_name,
                       std::vector<uint8_t> &program_data)
 {
@@ -29,6 +29,7 @@ void append_from_file(std::string const &file_name,
   file.close();
 }
 
+void processKeyboard() {}
 int main()
 {
   std::vector<std::string> paths_to_files = {
@@ -53,12 +54,107 @@ int main()
     {"v_ram", 0x1C00, smart_memory::MemoryAttribute::READ_WRITE});
   cpu.memory_.flashReadOnlySegment("rom", program_data);
 
-  while (1)
+  // Create Screen
+  SDL_Event event;
+  SDL_Init(SDL_INIT_VIDEO);
+  constexpr unsigned int screen_width = 256;
+  constexpr unsigned int screen_height = 224;
+  SDL_Window *window =
+    SDL_CreateWindow("SDL2 Keyboard/Mouse events", SDL_WINDOWPOS_UNDEFINED,
+                     SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, 0);
+
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+  SDL_Texture *texture =
+    SDL_CreateTexture(renderer, SDL_PIXELFORMAT_UNKNOWN,
+                      SDL_TEXTUREACCESS_STATIC, screen_width, screen_height);
+  Uint32 *pixels = new Uint32[screen_width * screen_height];
+
+  memset(pixels, 62, screen_width * screen_height * sizeof(Uint32));
+  bool quit = false;
+
+  // Emulator kernel: process IO, display, compute instructions, etc...
+  while (!quit)
   {
-    std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
-              << std::endl;
+    SDL_UpdateTexture(texture, NULL, pixels, screen_width * sizeof(Uint32));
+
+    // Need a non blocking way to do this
+    SDL_WaitEvent(&event);
+
+    switch (event.type)
+    {
+      case SDL_QUIT:
+        quit = true;
+        break;
+      case SDL_KEYDOWN:
+        switch (event.key.keysym.sym)
+        {
+          case SDLK_LEFT:
+          {
+            std::cout << "left\n";
+
+            break;
+          }
+          case SDLK_RIGHT:
+          {
+            std::cout << "right\n";
+            break;
+          }
+          case SDLK_UP:
+          {
+            std::cout << "up\n";
+            break;
+          }
+          case SDLK_DOWN:
+          {
+            std::cout << "down\n";
+            break;
+          }
+        }
+        break;
+    }
+
     cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
+    // std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
+    //          << std::endl;
+
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    SDL_RenderPresent(renderer);
   }
 
+  // cleanup SDL
+  delete[] pixels;
+  SDL_DestroyTexture(texture);
+  SDL_DestroyRenderer(renderer);
+
+  SDL_DestroyWindow(window);
+  SDL_Quit();
   return 0;
 }
+
+// Not ready for rendering code yet
+/*
+
+            for (unsigned int byte_count = 0;
+                 byte_count < screen_width * screen_height / 8; byte_count++)
+            {
+              if ((cpu.memory_[0x2000 + 0x400 + byte_count]) != 0)
+              {
+                std::cout << "something\n";
+              }
+
+              for (unsigned int bit = 0; bit < 8; bit++)
+              {
+                if (cpu.memory_[0x2000 + 0x400 + byte_count] & (0x01 << bit))
+                {
+                  pixels[byte_count * 8 + bit] = 255;
+                }
+
+                else
+                {
+                  pixels[byte_count * 8 + bit] = 0;
+                }
+              }
+            }
+
+*/
