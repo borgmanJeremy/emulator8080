@@ -8,6 +8,10 @@ void Cpu_8080::addValToReg(uint8_t val, uint8_t &reg)
   setCarryFlag(result);
   setSignFlag(result);
   setParityFlag(result);
+
+  uint8_t ac_test = (reg & 0x0F) + (val & 0x0F);
+  setAuxFlag(ac_test);
+
   reg = static_cast<uint8_t>(result);
 }
 
@@ -150,27 +154,27 @@ void Cpu_8080::addMathAddOperations()
                   reg_.pc++;
                 }});
 
-  instruction_set_.emplace_back(
-    Instruction{0x27, 0, "DAA", [this]() {
-                  uint8_t lower_four = (0x0F & reg_.a);
-                  if ((lower_four > 9) || flags_.ac == 1)
-                  {
-                    reg_.a +=6 ;
-                    flags_.ac = 1;
-                  }
-                  else
-                  {
-                    flags_.ac = 0;
-                  }
+  instruction_set_.emplace_back(Instruction{
+    0x27, 0, "DAA", [this]() {
+      uint8_t lower_four = (0x0F & reg_.a);
+      if ((lower_four > 9) || flags_.ac == 1)
+      {
+        reg_.a += 6;
+        flags_.ac = 1;
+      }
+      else
+      {
+        flags_.ac = 0;
+      }
 
-                  uint8_t upper_four = (0xF0 & reg_.a) >> 4;
-                  if ((flags_.cy == 1) || (upper_four > 9))
-                  {
-                    auto carryover = static_cast<unsigned int>(reg_.a) + (0x06 << 4);
-                    reg_.a  = static_cast<uint8_t>(carryover & 0xFF);
-                    flags_.cy = 1;
-                  }
+      uint8_t upper_four = (0xF0 & reg_.a) >> 4;
+      if ((flags_.cy == 1) || (upper_four > 9))
+      {
+        auto carryover = static_cast<unsigned int>(reg_.a) + (0x06 << 4);
+        reg_.a = static_cast<uint8_t>(carryover & 0xFF);
+        flags_.cy = 1;
+      }
 
-                  reg_.pc++;
-                }});
+      reg_.pc++;
+    }});
 }

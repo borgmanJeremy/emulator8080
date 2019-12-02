@@ -4,3 +4,4 @@
 - Update unit tests to have less copy and paste. Maybe put a pointer to each register in a vector and loop through a solution vector.
 - Write Curses interface to display register / flag status, stack, and surrounding instructions
 - Import hardware test software
+- Add much better tests around flags...already found an issue with it

@@ -10,6 +10,10 @@ void Cpu_8080::subValToReg(uint8_t val, uint8_t &reg)
   setCarryFlag(result);
   setSignFlag(result);
   setParityFlag(result);
+
+  uint8_t ac_test = (reg & 0x0F) - (val & 0x0F);
+  setAuxFlag(ac_test);
+
   reg = static_cast<uint8_t>(result);
 }
 
@@ -160,6 +164,10 @@ void Cpu_8080::addMathSubOperations()
       setCarryFlag(result);
       setSignFlag(result);
       setParityFlag(result);
+
+      uint8_t ac_test = (reg_.a & 0x0F) - (memory_[reg_.pc + 1] & 0x0F);
+      setAuxFlag(ac_test);
+
       reg_.pc += 2;
     }});
 }

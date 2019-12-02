@@ -38,6 +38,20 @@ Cpu_8080::Cpu_8080()
   // }
 }
 
+// This only checks the forth bit, so to correctly work the upper 4 bits should
+// be masked to zero before math operations
+void Cpu_8080::setAuxFlag(uint8_t result)
+{
+  if (result & (0x10))
+  {
+    flags_.ac = 1;
+  }
+  else
+  {
+    flags_.ac = 1;
+  }
+}
+
 void Cpu_8080::setZeroFlag(uint16_t result)
 {
   // On real 8 bit hardware I think 0xFF + 0x01 would equal 0x00. Since

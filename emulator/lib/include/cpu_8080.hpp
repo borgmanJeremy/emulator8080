@@ -65,7 +65,7 @@ class Cpu_8080
   std::vector<uint8_t> port_;
   smart_memory::Memory<uint8_t> memory_;
   uint8_t int_enable_;
- 
+
  private:
   static constexpr unsigned int port_size_ = 8;
 
@@ -88,6 +88,7 @@ class Cpu_8080
   void setSignFlag(uint16_t result);
   void setCarryFlag(uint16_t result);
   void setParityFlag(uint16_t result);
+  void setAuxFlag(uint8_t result);
 
   void addMathAddOperations();
   void addMathSubOperations();

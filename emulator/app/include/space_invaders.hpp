@@ -10,6 +10,32 @@
 #ifndef SPACE_INVADERS_HPP_
 #define SPACE_INVADERS_HPP_
 
+template <class T>
+class RingBuffer
+{
+ public:
+  RingBuffer() = delete;
+  RingBuffer(size_t size)
+  {
+    buffer_.resize(size);
+    std::fill(buffer_.begin(), buffer_.end(), 0);
+  }
+
+  void writeData(T elem)
+  {
+    idx_++;
+    if (idx_ == buffer_.size())
+    {
+      idx_ = 0;
+    }
+    buffer_[idx_] = elem;
+  }
+
+ private:
+  std::vector<T> buffer_;
+  size_t idx_ = 0;
+};
+
 enum class KeyState
 {
   PRESSED,

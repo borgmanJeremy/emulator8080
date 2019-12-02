@@ -211,8 +211,8 @@ void Memory<T>::writeMemory(unsigned int address, T value)
   {
     std::string error_msg =
       "Memory is Read Only at addr: " + std::to_string(address);
-    std::cout << error_msg << "\n";
-    // throw std::runtime_error(error_msg);
+    // std::cout << error_msg << "\n";
+    throw std::runtime_error(error_msg);
   }
 
   raw_memory_[address] = value;

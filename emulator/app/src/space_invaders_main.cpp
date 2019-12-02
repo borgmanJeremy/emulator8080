@@ -9,6 +9,9 @@
 #include "cpu_8080.hpp"
 #include "space_invaders.hpp"
 
+void drawWindow(int screen_width, int screen_height, Cpu_8080 &cpu,
+                Uint32 *pixels);
+
 int main()
 {
   std::vector<std::string> paths_to_files = {
@@ -23,14 +26,13 @@ int main()
   uint16_t shift_register_offset = 0;
   configureMemory(cpu, paths_to_files);
   /*
-    for (unsigned long i = 0; i < 9228; i++)
+    for (unsigned long i = 0; i < 42433; i++)
     {
       cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
     }
-
-    cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
-
   */
+  cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
+
   // Replace standard out/in instruction to handle external shift register
   cpu.instruction_set_[0xD3] = (Instruction{
     0xd3, 1, "OUT D8", [&cpu, &shift_register, &shift_register_offset]() {
@@ -88,6 +90,9 @@ int main()
   auto last_instruction = std::chrono::high_resolution_clock::now();
   auto next_interrupt = 1;
 
+  RingBuffer<unsigned int> pc_log(250);
+  RingBuffer<unsigned int> pc_log_hl(250);
+
   while (!quit)
   {
     SDL_UpdateTexture(texture, NULL, pixels, screen_width * sizeof(Uint32));
@@ -103,51 +108,30 @@ int main()
     time_now = std::chrono::high_resolution_clock::now();
     if (std::chrono::duration_cast<std::chrono::milliseconds>(time_now -
                                                               last_interrupt)
-          .count() > 5000)
-    {
-      cpu.int_enable_ = 1;
-      std::cout << "enabled interrupts\n";
-    }
-
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(time_now -
-                                                              last_interrupt)
           .count() > 16)
     {
       if (cpu.int_enable_ == 1)
       {
         cpu.reg_.pc--;
-        last_interrupt = std::chrono::high_resolution_clock::now();
+        cpu.int_enable_ = 0;
+
         if (next_interrupt == 1)
         {
           cpu.instruction_set_[0xCF].exp();
+          last_interrupt = std::chrono::high_resolution_clock::now();
           next_interrupt = 2;
+          drawWindow(screen_width, screen_height, cpu, pixels);
         }
         else
         {
           cpu.instruction_set_[0xD7].exp();
+          last_interrupt = std::chrono::high_resolution_clock::now();
           next_interrupt = 1;
-
-          // draw
-          for (unsigned int byte_count = 0;
-               byte_count < screen_width * screen_height / 8; byte_count++)
-          {
-            for (unsigned int bit = 0; bit < 8; bit++)
-            {
-              if (cpu.memory_[0x2000 + 0x400 + byte_count] & (0x01 << bit))
-              {
-                pixels[byte_count * 8 + bit] = 255;
-              }
-
-              else
-              {
-                pixels[byte_count * 8 + bit] = 0;
-              }
-            }
-          }
-          SDL_RenderClear(renderer);
-          SDL_RenderCopy(renderer, texture, NULL, NULL);
-          SDL_RenderPresent(renderer);
+          drawWindow(screen_width, screen_height, cpu, pixels);
         }
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderPresent(renderer);
       }
       time_now = std::chrono::high_resolution_clock::now();
       auto real_ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -158,7 +142,21 @@ int main()
 
       for (auto i = 0; i < num_instructions; i++)
       {
+        if ((cpu.reg_.pc == 0x27e) || (cpu.reg_.pc == NULL))
+        {
+          std::cout << "here\n";
+        }
+        auto old_h = cpu.reg_.h;
+        auto old_l = cpu.reg_.l;
+        auto old_pc = cpu.reg_.pc;
+
+        pc_log.writeData(old_pc);
         cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
+
+        if ((old_h != cpu.reg_.h) || (old_l != cpu.reg_.l))
+        {
+          pc_log_hl.writeData(old_pc);
+        }
       }
       last_instruction = std::chrono::high_resolution_clock::now();
     }
@@ -176,6 +174,28 @@ int main()
   SDL_DestroyWindow(window);
   SDL_Quit();
   return 0;
+}
+
+void drawWindow(int screen_width, int screen_height, Cpu_8080 &cpu,
+                Uint32 *pixels)
+{
+  // draw
+  for (unsigned int byte_count = 0;
+       byte_count < screen_width * screen_height / 8; byte_count++)
+  {
+    for (unsigned int bit = 0; bit < 8; bit++)
+    {
+      if (cpu.memory_[0x2000 + 0x400 + byte_count] & (0x01 << bit))
+      {
+        pixels[byte_count * 8 + bit] = 255 * 255 * 255;
+      }
+
+      else
+      {
+        pixels[byte_count * 8 + bit] = 0;
+      }
+    }
+  }
 }
 
 // Not ready for rendering code yet

@@ -7,6 +7,7 @@ void Cpu_8080::andRegToRegA(uint8_t to_and)
   setSignFlag(reg_.a);
   setParityFlag(reg_.a);
   flags_.cy = 0;
+  flags_.ac = 0;
 }
 
 void Cpu_8080::orRegToRegA(uint8_t to_or)
@@ -16,6 +17,7 @@ void Cpu_8080::orRegToRegA(uint8_t to_or)
   setSignFlag(reg_.a);
   setParityFlag(reg_.a);
   flags_.cy = 0;
+  flags_.ac = 0;
 }
 
 void Cpu_8080::xorRegToRegA(uint8_t to_xor)
@@ -25,6 +27,7 @@ void Cpu_8080::xorRegToRegA(uint8_t to_xor)
   setSignFlag(reg_.a);
   setParityFlag(reg_.a);
   flags_.cy = 0;
+  flags_.ac = 0;
 }
 
 void Cpu_8080::compRegToRegA(uint8_t to_comp)
@@ -36,6 +39,9 @@ void Cpu_8080::compRegToRegA(uint8_t to_comp)
   setSignFlag(result);
   setParityFlag(result);
   setCarryFlag(result);
+
+  uint8_t ac_test = (reg_.a & 0x0F) - (to_comp & 0x0F);
+  setAuxFlag(ac_test);
 }
 
 void Cpu_8080::addLogicalOperations()
