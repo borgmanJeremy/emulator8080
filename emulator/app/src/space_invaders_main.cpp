@@ -85,9 +85,6 @@ int main()
   bool quit = false;
 
   // Emulator kernel: process IO, display, compute instructions, etc...
-  auto last_interrupt = std::chrono::high_resolution_clock::now();
-  auto time_now = std::chrono::high_resolution_clock::now();
-  auto last_instruction = std::chrono::high_resolution_clock::now();
   auto next_interrupt = 1;
 
   RingBuffer<unsigned int> pc_log(250);
@@ -95,6 +92,12 @@ int main()
 
   while (!quit)
   {
+    auto now = std::chrono::high_resolution_clock::now();
+
+    while ((std::chrono::high_resolution_clock::now() - now) <
+           std::chrono::microseconds(20'000))
+    {
+    };
     SDL_UpdateTexture(texture, NULL, pixels, screen_width * sizeof(Uint32));
 
     // TODO: Need a non blocking way to do this, i think using wait instead of
@@ -105,64 +108,52 @@ int main()
     quit = inputDevice.processKeyboardEvent(event);
     updateCPUPorts(cpu, inputDevice.key_state_);
 
-    time_now = std::chrono::high_resolution_clock::now();
-    if (std::chrono::duration_cast<std::chrono::milliseconds>(time_now -
-                                                              last_interrupt)
-          .count() > 16)
+    // SmartCounter<unsigned long int> interrupt_count(64'000);
+    unsigned long int interrupt_count = 64'000;
+
+    interrupt_count = 0;
+    auto cpu_tick_time = std::chrono::nanoseconds(500);
+
+    auto host_cpu_interval = std::chrono::milliseconds(20);
+    auto cpu_cycles_per_host_interval = host_cpu_interval / cpu_tick_time;
+
+    auto interrupt_interval = std::chrono::microseconds(16'667);
+    auto interrupt_interal_tick = interrupt_interval / cpu_tick_time;
+
+    cpu.cycle_count_ = 0;
+    unsigned long old_cpu_count = cpu.cycle_count_;
+    while (cpu.cycle_count_ < cpu_cycles_per_host_interval)
     {
-      if (cpu.int_enable_ == 1)
+      old_cpu_count = cpu.cycle_count_;
+
+      cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
+      interrupt_count += (cpu.cycle_count_ - old_cpu_count);
+
+      if (interrupt_count >= interrupt_interal_tick)
       {
-        cpu.reg_.pc--;
-        cpu.int_enable_ = 0;
-
-        if (next_interrupt == 1)
+        interrupt_count = 0;
+        if (cpu.int_enable_ == 1)
         {
-          cpu.instruction_set_[0xCF].exp();
-          last_interrupt = std::chrono::high_resolution_clock::now();
-          next_interrupt = 2;
-          drawWindow(screen_width, screen_height, cpu, pixels);
-        }
-        else
-        {
-          cpu.instruction_set_[0xD7].exp();
-          last_interrupt = std::chrono::high_resolution_clock::now();
-          next_interrupt = 1;
-          drawWindow(screen_width, screen_height, cpu, pixels);
-        }
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
-        SDL_RenderPresent(renderer);
-      }
-      time_now = std::chrono::high_resolution_clock::now();
-      auto real_ticks = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                          time_now - last_instruction)
-                          .count();
-
-      auto num_instructions = real_ticks / 500;
-
-      for (auto i = 0; i < num_instructions; i++)
-      {
-        if ((cpu.reg_.pc == 0x27e) || (cpu.reg_.pc == NULL))
-        {
-          std::cout << "here\n";
-        }
-        auto old_h = cpu.reg_.h;
-        auto old_l = cpu.reg_.l;
-        auto old_pc = cpu.reg_.pc;
-
-        pc_log.writeData(old_pc);
-        cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
-
-        if ((old_h != cpu.reg_.h) || (old_l != cpu.reg_.l))
-        {
-          pc_log_hl.writeData(old_pc);
+          cpu.reg_.pc--;
+          cpu.int_enable_ = 0;
+          if (next_interrupt == 1)
+          {
+            cpu.instruction_set_[0xCF].exp();
+            next_interrupt = 2;
+            drawWindow(screen_width, screen_height, cpu, pixels);
+          }
+          else
+          {
+            cpu.instruction_set_[0xD7].exp();
+            next_interrupt = 1;
+            drawWindow(screen_width, screen_height, cpu, pixels);
+          }
+          SDL_RenderClear(renderer);
+          SDL_RenderCopy(renderer, texture, NULL, NULL);
+          SDL_RenderPresent(renderer);
         }
       }
-      last_instruction = std::chrono::high_resolution_clock::now();
     }
-
-    // std::cout << cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].instruction
-    //          << std::endl;
   }
 
   // cleanup SDL

@@ -3,7 +3,7 @@
 Cpu_8080::Cpu_8080()
 {
   int_enable_ = 0;
-  cycle_count_.setLimit(100'000);
+  // cycle_count_.setLimit(100'000);
 
   port_.resize(port_size_);
   std::fill(port_.begin(), port_.end(), 0);

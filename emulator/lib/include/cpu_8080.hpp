@@ -67,7 +67,8 @@ class Cpu_8080
   smart_memory::Memory<uint8_t> memory_;
   uint8_t int_enable_;
 
-  SmartCounter<unsigned int> cycle_count_;
+  unsigned long int cycle_count_;
+  // SmartCounter<unsigned long int> cycle_count_;
 
  private:
   static constexpr unsigned int port_size_ = 8;
