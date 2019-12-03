@@ -3,5 +3,7 @@
 - Update unit tests to make sure no functions have side effects
 - Update unit tests to have less copy and paste. Maybe put a pointer to each register in a vector and loop through a solution vector.
 - Write Curses interface to display register / flag status, stack, and surrounding instructions
-- Import hardware test software
+x Import hardware test software
 - Add much better tests around flags...already found an issue with it
+- Refactor instruction init so PC and size are corelated...same with cycle count
+- Add unit tests to check cycle count

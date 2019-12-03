@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include "memory.hpp"
+#include "smart_counter.hpp"
 
 struct Instruction
 {
@@ -65,6 +66,8 @@ class Cpu_8080
   std::vector<uint8_t> port_;
   smart_memory::Memory<uint8_t> memory_;
   uint8_t int_enable_;
+
+  SmartCounter<unsigned int> cycle_count_;
 
  private:
   static constexpr unsigned int port_size_ = 8;
