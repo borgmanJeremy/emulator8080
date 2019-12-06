@@ -5,10 +5,13 @@ Cpu_8080::Cpu_8080()
   int_enable_ = 0;
   // cycle_count_.setLimit(100'000);
 
-  port_.resize(port_size_);
-  std::fill(port_.begin(), port_.end(), 0);
-  port_[0] = 0x0E;
-  port_[1] = 0x09;
+  input_port_.resize(port_size_);
+  std::fill(input_port_.begin(), input_port_.end(), 0);
+  input_port_[0] = 0x0E;
+  input_port_[1] = 0x09;
+
+  output_port_.resize(port_size_);
+  std::fill(output_port_.begin(), output_port_.end(), 0);
 
   instruction_set_.emplace_back(Instruction{0, 0, "NOP", [this]() {
                                               cycle_count_ += 4;

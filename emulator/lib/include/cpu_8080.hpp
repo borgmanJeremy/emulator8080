@@ -63,7 +63,9 @@ class Cpu_8080
   std::vector<Instruction> instruction_set_;
   Registers reg_;
   Flags flags_;
-  std::vector<uint8_t> port_;
+  std::vector<uint8_t> output_port_;
+  std::vector<uint8_t> input_port_;
+
   smart_memory::Memory<uint8_t> memory_;
   uint8_t int_enable_;
 

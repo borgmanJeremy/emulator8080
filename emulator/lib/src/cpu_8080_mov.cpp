@@ -668,14 +668,14 @@ void Cpu_8080::addMoveOperations()
 
   instruction_set_.emplace_back(Instruction{0xd3, 1, "OUT D8", [this]() {
                                               uint8_t port_num = memory_[reg_.pc + 1];
-                                              port_[port_num-1] = reg_.a;
+                                              output_port_[port_num] = reg_.a;
                                               reg_.pc += 2;
                                               cycle_count_+=10;
                                             }});
 
   instruction_set_.emplace_back(Instruction{0xdb, 1, "IN D8", [this]() {
                                               uint8_t port_num = memory_[reg_.pc + 1];
-                                              reg_.a = port_[port_num -1];
+                                              reg_.a = input_port_[port_num ];
                                               reg_.pc += 2;
                                               cycle_count_+=10;
                                             }});

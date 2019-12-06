@@ -22,7 +22,8 @@ int main()
   };
 
   Cpu_8080 cpu;
-  uint16_t shift_register = 0;
+  uint16_t shift_register_0 = 0;
+  uint16_t shift_register_1 = 0;
   uint16_t shift_register_offset = 0;
   configureMemory(cpu, paths_to_files);
   /*
@@ -35,32 +36,38 @@ int main()
 
   // Replace standard out/in instruction to handle external shift register
   cpu.instruction_set_[0xD3] = (Instruction{
-    0xd3, 1, "OUT D8", [&cpu, &shift_register, &shift_register_offset]() {
+    0xd3, 1, "OUT D8",
+    [&cpu, &shift_register_0, &shift_register_1, &shift_register_offset]() {
       uint8_t port_num = cpu.memory_[cpu.reg_.pc + 1];
-      cpu.port_[port_num - 1] = cpu.reg_.a;
+      cpu.output_port_[port_num] = cpu.reg_.a;
       cpu.reg_.pc += 2;
+      cpu.cycle_count_ += 10;
       if (port_num == 2)
       {
         // lower 3 bits used to make offset
-        shift_register_offset = cpu.port_[port_num - 1] & 0x07;
+        shift_register_offset = cpu.output_port_[port_num] & 0x07;
       }
 
       else if (port_num == 4)
       {
-        shift_register <<= 8;
-        shift_register &= cpu.port_[port_num - 1];
+        shift_register_0 = shift_register_1;
+        shift_register_1 = cpu.output_port_[port_num];
       }
     }});
 
   cpu.instruction_set_[0xDB] = (Instruction{
-    0xdb, 1, "IN D8", [&cpu, &shift_register, &shift_register_offset]() {
+    0xdb, 1, "IN D8",
+    [&cpu, &shift_register_0, &shift_register_1, &shift_register_offset]() {
       uint8_t port_num = cpu.memory_[cpu.reg_.pc + 1];
-      cpu.reg_.a = cpu.port_[port_num - 1];
+      cpu.reg_.a = cpu.input_port_[port_num];
       cpu.reg_.pc += 2;
+      cpu.cycle_count_ += 10;
       if (port_num == 3)
       {
-        cpu.reg_.a = static_cast<uint8_t>(
-          (shift_register >> shift_register_offset) & 0xFF);
+        uint16_t shift_register_value =
+          (shift_register_1 << 8) | shift_register_0;
+        cpu.reg_.a =
+          ((shift_register_value >> (8 - shift_register_offset)) & 0xff);
       }
     }});
 
@@ -109,15 +116,14 @@ int main()
     updateCPUPorts(cpu, inputDevice.key_state_);
 
     // SmartCounter<unsigned long int> interrupt_count(64'000);
-    unsigned long int interrupt_count = 64'000;
+    unsigned long int interrupt_count = 0;
 
-    interrupt_count = 0;
     auto cpu_tick_time = std::chrono::nanoseconds(500);
 
     auto host_cpu_interval = std::chrono::milliseconds(20);
     auto cpu_cycles_per_host_interval = host_cpu_interval / cpu_tick_time;
 
-    auto interrupt_interval = std::chrono::microseconds(16'667);
+    auto interrupt_interval = std::chrono::microseconds(8'333);
     auto interrupt_interal_tick = interrupt_interval / cpu_tick_time;
 
     cpu.cycle_count_ = 0;

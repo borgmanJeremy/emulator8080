@@ -47,14 +47,17 @@ void clearBit(uint8_t &byte, uint8_t bit_pos) { byte &= ~(0x01 << bit_pos); }
 
 void updateCPUPorts(Cpu_8080 &cpu, std::map<std::string, KeyState> const &state)
 {
-  (state.at("player_1_shoot") == KeyState::PRESSED) ? setBit(cpu.port_[0], 4)
-                                                    : clearBit(cpu.port_[0], 4);
+  (state.at("player_1_shoot") == KeyState::PRESSED)
+    ? setBit(cpu.input_port_[0], 4)
+    : clearBit(cpu.input_port_[0], 4);
 
-  (state.at("player_1_left") == KeyState::PRESSED) ? setBit(cpu.port_[0], 5)
-                                                   : clearBit(cpu.port_[0], 5);
+  (state.at("player_1_left") == KeyState::PRESSED)
+    ? setBit(cpu.input_port_[0], 5)
+    : clearBit(cpu.input_port_[0], 5);
 
-  (state.at("player_1_right") == KeyState::PRESSED) ? setBit(cpu.port_[0], 6)
-                                                    : clearBit(cpu.port_[0], 6);
+  (state.at("player_1_right") == KeyState::PRESSED)
+    ? setBit(cpu.input_port_[0], 6)
+    : clearBit(cpu.input_port_[0], 6);
 }
 
 PlayerInput::PlayerInput()
