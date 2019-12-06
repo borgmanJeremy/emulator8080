@@ -48,20 +48,29 @@ void clearBit(uint8_t &byte, uint8_t bit_pos) { byte &= ~(0x01 << bit_pos); }
 void updateCPUPorts(Cpu_8080 &cpu, std::map<std::string, KeyState> const &state)
 {
   (state.at("player_1_shoot") == KeyState::PRESSED)
-    ? setBit(cpu.input_port_[0], 4)
-    : clearBit(cpu.input_port_[0], 4);
+    ? setBit(cpu.input_port_[1], 4)
+    : clearBit(cpu.input_port_[1], 4);
 
   (state.at("player_1_left") == KeyState::PRESSED)
-    ? setBit(cpu.input_port_[0], 5)
-    : clearBit(cpu.input_port_[0], 5);
+    ? setBit(cpu.input_port_[1], 5)
+    : clearBit(cpu.input_port_[1], 5);
 
   (state.at("player_1_right") == KeyState::PRESSED)
-    ? setBit(cpu.input_port_[0], 6)
-    : clearBit(cpu.input_port_[0], 6);
+    ? setBit(cpu.input_port_[1], 6)
+    : clearBit(cpu.input_port_[1], 6);
+
+  (state.at("player_1_start") == KeyState::PRESSED)
+    ? setBit(cpu.input_port_[1], 2)
+    : clearBit(cpu.input_port_[1], 2);
+
+  (state.at("coin") == KeyState::PRESSED) ? setBit(cpu.input_port_[1], 0)
+                                          : clearBit(cpu.input_port_[1], 0);
 }
 
 PlayerInput::PlayerInput()
 {
+  key_state_["coin"] = KeyState::NOT_PRESSED;
+
   key_state_["player_1_start"] = KeyState::NOT_PRESSED;
   key_state_["player_1_shoot"] = KeyState::NOT_PRESSED;
   key_state_["player_1_left"] = KeyState::NOT_PRESSED;
@@ -101,7 +110,7 @@ bool PlayerInput::processKeyboardEvent(SDL_Event &event)
         }
         case SDLK_SPACE:
         {
-          key_state_["player_1_space"] = KeyState::PRESSED;
+          key_state_["player_1_shoot"] = KeyState::PRESSED;
           std::cout << "space down\n";
           break;
         }
@@ -109,6 +118,14 @@ bool PlayerInput::processKeyboardEvent(SDL_Event &event)
         {
           key_state_["player_1_start"] = KeyState::PRESSED;
           std::cout << "Enter Down\n";
+          break;
+        }
+
+        case SDLK_c:
+        {
+          key_state_["coin"] = KeyState::PRESSED;
+          std::cout << "c Down\n";
+
           break;
         }
       }
@@ -131,7 +148,7 @@ bool PlayerInput::processKeyboardEvent(SDL_Event &event)
         }
         case SDLK_SPACE:
         {
-          key_state_["player_1_space"] = KeyState::NOT_PRESSED;
+          key_state_["player_1_shoot"] = KeyState::NOT_PRESSED;
           std::cout << "space up\n";
           break;
         }
@@ -140,6 +157,11 @@ bool PlayerInput::processKeyboardEvent(SDL_Event &event)
           key_state_["player_1_start"] = KeyState::NOT_PRESSED;
           std::cout << "Enter up\n";
           break;
+        }
+        case SDLK_c:
+        {
+          key_state_["coin"] = KeyState::NOT_PRESSED;
+          std::cout << "c up\n";
         }
       }
       break;

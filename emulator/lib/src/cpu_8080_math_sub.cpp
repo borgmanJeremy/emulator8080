@@ -141,7 +141,7 @@ void Cpu_8080::addMathSubOperations()
   instruction_set_.emplace_back(
     Instruction{0x0B, 0, "DCX B", [this]() {
                   unsigned int subtraction =
-                    (static_cast<unsigned int>(reg_.b) << 8) - reg_.c;
+                    (static_cast<unsigned int>(reg_.b) << 8) + reg_.c;
                   subtraction--;
                   reg_.b = static_cast<uint8_t>(subtraction >> 8);
                   reg_.c = static_cast<uint8_t>(subtraction & 0x00FF);
@@ -152,14 +152,15 @@ void Cpu_8080::addMathSubOperations()
   instruction_set_.emplace_back(
     Instruction{0x1B, 0, "DCX D", [this]() {
                   unsigned int subtraction =
-                    (static_cast<unsigned int>(reg_.d) << 8) - reg_.e;
+                    (static_cast<unsigned int>(reg_.d) << 8) + reg_.e;
                   subtraction--;
                   reg_.d = static_cast<uint8_t>(subtraction >> 8);
                   reg_.e = static_cast<uint8_t>(subtraction & 0x00FF);
                   reg_.pc++;
                   cycle_count_ += 5;
                 }});
-
+  // TODO: Very important!! fix all dcx to be like dcx h, need to combine
+  // registr high with low by adding before subtracting
   instruction_set_.emplace_back(
     Instruction{0x2B, 0, "DCX H", [this]() {
                   unsigned int subtraction =

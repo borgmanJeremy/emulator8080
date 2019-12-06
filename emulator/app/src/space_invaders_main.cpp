@@ -109,13 +109,12 @@ int main()
 
     // TODO: Need a non blocking way to do this, i think using wait instead of
     // poll and then using keyup / keydown to set port state will work better
-    // SDL_PollEvent(&event);
+    SDL_WaitEventTimeout(&event, 2);
 
     // TODO: Maybe use std::variant for this
     quit = inputDevice.processKeyboardEvent(event);
-    // updateCPUPorts(cpu, inputDevice.key_state_);
+    updateCPUPorts(cpu, inputDevice.key_state_);
 
-    // SmartCounter<unsigned long int> interrupt_count(64'000);
     unsigned long int interrupt_count = 0;
 
     auto cpu_tick_time = std::chrono::nanoseconds(500);
@@ -132,7 +131,7 @@ int main()
     {
       old_cpu_count = cpu.cycle_count_;
 
-      pc_log.writeData(cpu.reg_.pc);
+      // pc_log.writeData(cpu.reg_.pc);
       cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
 
       interrupt_count += (cpu.cycle_count_ - old_cpu_count);
