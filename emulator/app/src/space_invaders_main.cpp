@@ -67,7 +67,7 @@ int main()
         uint16_t shift_register_value =
           (shift_register_1 << 8) | shift_register_0;
         cpu.reg_.a =
-          ((shift_register_value >> (8 - shift_register_offset)) & 0xff);
+          ((shift_register_value >> (8 - shift_register_offset)) & 0xFF);
       }
     }});
 
@@ -113,7 +113,7 @@ int main()
 
     // TODO: Maybe use std::variant for this
     quit = inputDevice.processKeyboardEvent(event);
-    updateCPUPorts(cpu, inputDevice.key_state_);
+    // updateCPUPorts(cpu, inputDevice.key_state_);
 
     // SmartCounter<unsigned long int> interrupt_count(64'000);
     unsigned long int interrupt_count = 0;
@@ -132,7 +132,9 @@ int main()
     {
       old_cpu_count = cpu.cycle_count_;
 
+      pc_log.writeData(cpu.reg_.pc);
       cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
+
       interrupt_count += (cpu.cycle_count_ - old_cpu_count);
 
       if (interrupt_count >= interrupt_interal_tick)
@@ -142,18 +144,19 @@ int main()
         {
           cpu.reg_.pc--;
           cpu.int_enable_ = 0;
+
           if (next_interrupt == 1)
           {
             cpu.instruction_set_[0xCF].exp();
             next_interrupt = 2;
-            drawWindow(screen_width, screen_height, cpu, pixels);
           }
           else
           {
             cpu.instruction_set_[0xD7].exp();
             next_interrupt = 1;
-            drawWindow(screen_width, screen_height, cpu, pixels);
           }
+
+          drawWindow(screen_width, screen_height, cpu, pixels);
           SDL_RenderClear(renderer);
           SDL_RenderCopy(renderer, texture, NULL, NULL);
           SDL_RenderPresent(renderer);
@@ -177,8 +180,8 @@ void drawWindow(int screen_width, int screen_height, Cpu_8080 &cpu,
                 Uint32 *pixels)
 {
   // draw
-  for (unsigned int byte_count = 0;
-       byte_count < screen_width * screen_height / 8; byte_count++)
+  for (auto byte_count = 0; byte_count < screen_width * screen_height / 8;
+       byte_count++)
   {
     for (unsigned int bit = 0; bit < 8; bit++)
     {

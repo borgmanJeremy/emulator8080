@@ -163,7 +163,7 @@ void Cpu_8080::addMathSubOperations()
   instruction_set_.emplace_back(
     Instruction{0x2B, 0, "DCX H", [this]() {
                   unsigned int subtraction =
-                    (static_cast<unsigned int>(reg_.h) << 8) - reg_.l;
+                    (static_cast<unsigned int>(reg_.h) << 8) + reg_.l;
                   subtraction--;
                   reg_.h = static_cast<uint8_t>(subtraction >> 8);
                   reg_.l = static_cast<uint8_t>(subtraction & 0x00FF);
