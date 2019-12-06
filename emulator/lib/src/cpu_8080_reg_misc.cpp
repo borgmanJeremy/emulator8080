@@ -108,6 +108,8 @@ void Cpu_8080::addRegMisc()
 
   instruction_set_.emplace_back(Instruction{0x33, 0, "INX SP", [this]() {
                                               reg_.sp++;
+
+                                              // TODO FLAG NOT SET
                                               reg_.pc++;
                                               cycle_count_ += 5;
                                             }});
@@ -153,6 +155,7 @@ void Cpu_8080::addRegMisc()
                                               auto addr = getAddressFromHL();
                                               memory_[addr] = memory_[addr] + 1;
                                               reg_.pc++;
+                                              // TODO FLAG NOT SET
                                               cycle_count_ += 10;
                                             }});
 
@@ -202,6 +205,17 @@ void Cpu_8080::addRegMisc()
   instruction_set_.emplace_back(Instruction{0x35, 0, "DCR M", [this]() {
                                               auto addr = getAddressFromHL();
                                               memory_[addr] = memory_[addr] - 1;
+                                              uint8_t result = memory_[addr];
+                                              setZeroFlag(result);
+                                              setCarryFlag(result);
+                                              setSignFlag(result);
+                                              setParityFlag(result);
+
+                                              //  uint8_t ac_test = (reg & 0x0F)
+                                              //  - (val & 0x0F);
+                                              //  setAuxFlag(ac_test);
+
+                                              // TODO: Flags not set!!!!
                                               reg_.pc++;
                                               cycle_count_ += 10;
                                             }});

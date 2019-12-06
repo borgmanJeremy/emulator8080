@@ -132,6 +132,15 @@ int main()
       old_cpu_count = cpu.cycle_count_;
 
       // pc_log.writeData(cpu.reg_.pc);
+      uint16_t breakpoint = 0x1538;
+      uint16_t watch_address = 0x2002;
+      uint8_t watch_value = 0x00;
+
+      if ((cpu.reg_.pc == breakpoint) &&
+          (cpu.memory_[watch_address] != watch_value))
+      {
+        std::cout << "Break";
+      }
       cpu.instruction_set_[cpu.memory_[cpu.reg_.pc]].exp();
 
       interrupt_count += (cpu.cycle_count_ - old_cpu_count);
@@ -157,7 +166,10 @@ int main()
 
           drawWindow(screen_width, screen_height, cpu, pixels);
           SDL_RenderClear(renderer);
-          SDL_RenderCopy(renderer, texture, NULL, NULL);
+          // SDL_RenderCopy(renderer, texture, NULL, NULL);
+          SDL_RenderCopyEx(renderer, texture, NULL, NULL, 270, NULL,
+                           SDL_FLIP_NONE);
+
           SDL_RenderPresent(renderer);
         }
       }
@@ -196,30 +208,3 @@ void drawWindow(int screen_width, int screen_height, Cpu_8080 &cpu,
     }
   }
 }
-
-// Not ready for rendering code yet
-/*
-
-            for (unsigned int byte_count = 0;
-                 byte_count < screen_width * screen_height / 8; byte_count++)
-            {
-              if ((cpu.memory_[0x2000 + 0x400 + byte_count]) != 0)
-              {
-                std::cout << "something\n";
-              }
-
-              for (unsigned int bit = 0; bit < 8; bit++)
-              {
-                if (cpu.memory_[0x2000 + 0x400 + byte_count] & (0x01 << bit))
-                {
-                  pixels[byte_count * 8 + bit] = 255;
-                }
-
-                else
-                {
-                  pixels[byte_count * 8 + bit] = 0;
-                }
-              }
-            }
-
-*/

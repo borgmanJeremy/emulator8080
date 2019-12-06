@@ -86,7 +86,7 @@ void Cpu_8080::addMoveOperations()
                 }});
 
   instruction_set_.emplace_back(Instruction{
-    0x32, 2, "STA adr", [this]() {
+    0x32, 3, "STA adr", [this]() {
       auto addr = (static_cast<unsigned int>(memory_[reg_.pc + 2]) << 8) +
                   memory_[reg_.pc + 1];
       memory_[addr] = reg_.a;
@@ -96,7 +96,7 @@ void Cpu_8080::addMoveOperations()
     }});
 
   instruction_set_.emplace_back(Instruction{
-    0x3A, 2, "LDA adr", [this]() {
+    0x3A, 3, "LDA adr", [this]() {
       auto addr = (static_cast<unsigned int>(memory_[reg_.pc + 2]) << 8) +
                   memory_[reg_.pc + 1];
       reg_.a = memory_[addr];
