@@ -1,5 +1,61 @@
 #include <catch2/catch.hpp>
+#include <map>
+#include <string>
 #include "cpu_8080.hpp"
+
+struct RegisterSolution
+{
+  uint8_t instruction_;
+  Registers reg_solution_;
+  Flags flag_solution_;
+};
+
+TEST_CASE("Simple Adds")
+{
+  Cpu_8080 cpu;
+
+  cpu.memory_.pushSegment(
+    {"rom", 0x2000, smart_memory::MemoryAttribute::READ_ONLY});
+  cpu.memory_.pushSegment(
+    {"ram", 0x400, smart_memory::MemoryAttribute::READ_WRITE});
+  cpu.memory_.pushSegment(
+    {"v_ram", 0x1600, smart_memory::MemoryAttribute::READ_WRITE});
+
+  Flags common_flag_solution{0, 0, 0, 0, 0};
+  Registers common_register_solution{0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+  std::vector<RegisterSolution> test_instructions;
+  test_instructions.resize(2);
+  std::fill(
+    test_instructions.begin(), test_instructions.end(),
+    RegisterSolution{0x00, common_register_solution, common_flag_solution});
+
+  test_instructions[0].instruction_ = 0x80;
+  test_instructions[1].instruction_ = 0x81;
+
+  SECTION("Result is zero, z=1 s=0 p=1 ac=0 cy=0")
+  {
+    for (auto &result : test_instructions)
+    {
+      result.flag_solution_.z = 1;
+      result.flag_solution_.p = 1;
+      result.reg_solution_.pc = 1;
+    }
+
+    for (auto const &instruction : test_instructions)
+    {
+      SECTION(std::to_string(instruction.instruction_))
+      {
+        cpu.instruction_set_[instruction.instruction_].exp();
+        INFO("The instruction is "
+             << static_cast<int>(instruction.instruction_));
+        REQUIRE(cpu.flags_ == instruction.flag_solution_);
+        REQUIRE(cpu.reg_ == instruction.reg_solution_);
+      }
+    }
+  }
+}
+
 TEST_CASE("Add ", "[type]")
 {
   Cpu_8080 cpu;

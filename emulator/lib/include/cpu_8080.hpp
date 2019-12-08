@@ -30,11 +30,17 @@ struct Registers
   uint8_t l = 0;
   uint16_t sp = 0;
   uint16_t pc = 0;
-  bool operator==(const Registers& reg) const
+  bool operator==(Registers const &reg) const
   {
     return ((reg.a == a) && (reg.b == b) && (reg.c == c) && (reg.d == d) &&
             (reg.e == e) && (reg.h == h) && (reg.l == l) && (reg.sp == sp) &&
             (reg.pc == pc));
+  }
+
+  friend std::ostream &operator<<(std::ostream &out, const Registers &reg)
+  {
+    out << "a: " << std::to_string(reg.a);
+    return out;
   }
 };
 
@@ -45,6 +51,22 @@ struct Flags
   uint8_t p = 0;
   uint8_t cy = 0;
   uint8_t ac = 0;
+
+  bool operator==(Flags const &flag) const
+  {
+    return ((flag.z == z) && (flag.s == s) && (flag.p == p) &&
+            (flag.cy == cy) && (flag.ac == ac));
+  }
+
+  friend std::ostream &operator<<(std::ostream &out, const Flags &flag)
+  {
+    out << "z: " << std::to_string(flag.z) << "\n"
+        << "s: " << std::to_string(flag.s) << "\n"
+        << "p: " << std::to_string(flag.p) << "\n"
+        << "cy: " << std::to_string(flag.cy) << "\n"
+        << "ac: " << std::to_string(flag.ac) << "\n";
+    return out;
+  }
 };
 
 class Cpu_8080
@@ -53,7 +75,7 @@ class Cpu_8080
   Cpu_8080();
   ~Cpu_8080() = default;
 
-  void passCommandArgs(std::vector<uint8_t> const& args);
+  void passCommandArgs(std::vector<uint8_t> const &args);
   uint16_t getAddressFromHL() const;
   uint16_t getAddressFromBC() const;
   uint16_t getAddressFromDE() const;
@@ -78,12 +100,12 @@ class Cpu_8080
   void addRegToRegA(uint8_t to_add);
   void addRegToRegAWithCarry(uint8_t to_add);
 
-  void addValToReg(uint8_t val, uint8_t& reg);
+  void addValToReg(uint8_t val, uint8_t &reg);
   void doubleAddToHL(uint8_t upper_byte, uint8_t lower_byte);
 
   void subRegToRegA(uint8_t to_sub);
   void subRegToRegAWithBorrow(uint8_t to_sub);
-  void subValToReg(uint8_t val, uint8_t& reg);
+  void subValToReg(uint8_t val, uint8_t &reg);
 
   void andRegToRegA(uint8_t to_and);
   void orRegToRegA(uint8_t to_or);

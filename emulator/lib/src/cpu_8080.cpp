@@ -55,7 +55,7 @@ void Cpu_8080::setAuxFlag(uint8_t result)
   }
   else
   {
-    flags_.ac = 1;
+    flags_.ac = 0;
   }
 }
 
