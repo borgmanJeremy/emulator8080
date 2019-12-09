@@ -39,7 +39,16 @@ struct Registers
 
   friend std::ostream &operator<<(std::ostream &out, const Registers &reg)
   {
-    out << "a: " << std::to_string(reg.a);
+    out << "a: " << std::to_string(reg.a) << "\n" 
+        << "b: " << std::to_string(reg.b) << "\n" 
+        << "c: " << std::to_string(reg.c) << "\n"
+        << "d: " << std::to_string(reg.d) << "\n" 
+        << "e: " << std::to_string(reg.e) << "\n" 
+        << "h: " << std::to_string(reg.h) << "\n"
+        << "l: " << std::to_string(reg.l) << "\n" 
+        << "sp: " << std::to_string(reg.sp) << "\n" 
+        << "pc: " << std::to_string(reg.pc) << "\n";
+
     return out;
   }
 };

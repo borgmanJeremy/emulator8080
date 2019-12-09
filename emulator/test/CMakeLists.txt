@@ -11,6 +11,7 @@ add_executable(test_8080)
 target_sources(test_8080 
             PRIVATE
                 "test_main.cpp"
+                "test_class.cpp"
                 "test_smart_counter.cpp"
                  "test_8080_add.cpp"
                  "test_8080_sub.cpp"
