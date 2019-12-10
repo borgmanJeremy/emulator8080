@@ -33,14 +33,14 @@ enum class REG_NAME
   SP,
   PC
 };
-// TODO better name for this
-struct RegisterSolution
+
+struct ScenarioGroup
 {
   uint8_t instruction_;
-  Registers reg_setup_;
-  Registers reg_solution_;
-  Flags flag_setup_;
-  Flags flag_solution_;
+  Registers reg_precondition_;
+  Registers reg_postcondition_;
+  Flags flag_precondition_;
+  Flags flag_postcondition_;
 };
 
 class TestConfig
@@ -64,7 +64,7 @@ class TestConfig
   Flags default_flags_{0, 0, 0, 0, 0};
   Registers default_registers_{0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-  std::vector<RegisterSolution> test_instructions_;
+  std::vector<ScenarioGroup> test_instructions_;
 
  private:
   void modifyValuesInScope(uint8_t &setup, uint8_t &solution, uint8_t value,
@@ -74,10 +74,10 @@ class TestConfig
                            MOD_SCOPE mod);
 
   void modifyRegister(REG_NAME reg, unsigned int value, MOD_SCOPE mod,
-                      RegisterSolution &elem);
+                      ScenarioGroup &elem);
 
   void modifyFlag(FLAG_NAME flag, unsigned int value, MOD_SCOPE mod,
-                  RegisterSolution &elem);
+                  ScenarioGroup &elem);
 };
 
 #endif  // TEST_CLASS_HPP_

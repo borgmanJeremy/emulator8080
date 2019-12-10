@@ -56,40 +56,40 @@ void TestConfig::modifyValuesInScope(uint16_t &setup, uint16_t &solution,
 }
 
 void TestConfig::modifyFlag(FLAG_NAME flag, unsigned int value, MOD_SCOPE mod,
-                            RegisterSolution &elem)
+                            ScenarioGroup &elem)
 {
   switch (flag)
   {
     case FLAG_NAME::AC:
     {
-      modifyValuesInScope(elem.flag_setup_.ac, elem.flag_solution_.ac, value,
-                          mod);
+      modifyValuesInScope(elem.flag_precondition_.ac,
+                          elem.flag_postcondition_.ac, value, mod);
       break;
     }
     case FLAG_NAME::CY:
     {
-      modifyValuesInScope(elem.flag_setup_.cy, elem.flag_solution_.cy, value,
-                          mod);
+      modifyValuesInScope(elem.flag_precondition_.cy,
+                          elem.flag_postcondition_.cy, value, mod);
       break;
     }
 
     case FLAG_NAME::P:
     {
-      modifyValuesInScope(elem.flag_setup_.p, elem.flag_solution_.p, value,
-                          mod);
+      modifyValuesInScope(elem.flag_precondition_.p, elem.flag_postcondition_.p,
+                          value, mod);
       break;
     }
 
     case FLAG_NAME::S:
     {
-      modifyValuesInScope(elem.flag_setup_.s, elem.flag_solution_.s, value,
-                          mod);
+      modifyValuesInScope(elem.flag_precondition_.s, elem.flag_postcondition_.s,
+                          value, mod);
       break;
     }
     case FLAG_NAME::Z:
     {
-      modifyValuesInScope(elem.flag_setup_.z, elem.flag_solution_.z, value,
-                          mod);
+      modifyValuesInScope(elem.flag_precondition_.z, elem.flag_postcondition_.z,
+                          value, mod);
       break;
     }
   }
@@ -138,55 +138,62 @@ void TestConfig::modifyRegisterAllInstructions(REG_NAME reg, unsigned int value,
 }
 
 void TestConfig::modifyRegister(REG_NAME reg, unsigned int value, MOD_SCOPE mod,
-                                RegisterSolution &elem)
+                                ScenarioGroup &elem)
 {
   switch (reg)
   {
     case (REG_NAME::A):
     {
-      modifyValuesInScope(elem.reg_setup_.a, elem.reg_solution_.a, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.a, elem.reg_postcondition_.a,
+                          value, mod);
       break;
     }
     case (REG_NAME::B):
     {
-      modifyValuesInScope(elem.reg_setup_.b, elem.reg_solution_.b, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.b, elem.reg_postcondition_.b,
+                          value, mod);
       break;
     }
     case (REG_NAME::C):
     {
-      modifyValuesInScope(elem.reg_setup_.c, elem.reg_solution_.c, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.c, elem.reg_postcondition_.c,
+                          value, mod);
       break;
     }
     case (REG_NAME::D):
     {
-      modifyValuesInScope(elem.reg_setup_.d, elem.reg_solution_.d, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.d, elem.reg_postcondition_.d,
+                          value, mod);
       break;
     }
     case (REG_NAME::E):
     {
-      modifyValuesInScope(elem.reg_setup_.e, elem.reg_solution_.e, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.e, elem.reg_postcondition_.e,
+                          value, mod);
       break;
     }
     case (REG_NAME::H):
     {
-      modifyValuesInScope(elem.reg_setup_.h, elem.reg_solution_.h, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.h, elem.reg_postcondition_.h,
+                          value, mod);
       break;
     }
     case (REG_NAME::L):
     {
-      modifyValuesInScope(elem.reg_setup_.l, elem.reg_solution_.l, value, mod);
+      modifyValuesInScope(elem.reg_precondition_.l, elem.reg_postcondition_.l,
+                          value, mod);
       break;
     }
     case (REG_NAME::SP):
     {
-      modifyValuesInScope(elem.reg_setup_.sp, elem.reg_solution_.sp, value,
-                          mod);
+      modifyValuesInScope(elem.reg_precondition_.sp, elem.reg_postcondition_.sp,
+                          value, mod);
       break;
     }
     case (REG_NAME::PC):
     {
-      modifyValuesInScope(elem.reg_setup_.pc, elem.reg_solution_.pc, value,
-                          mod);
+      modifyValuesInScope(elem.reg_precondition_.pc, elem.reg_postcondition_.pc,
+                          value, mod);
       break;
     }
   }

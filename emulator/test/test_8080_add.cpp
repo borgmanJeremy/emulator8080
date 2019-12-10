@@ -33,15 +33,68 @@ TEST_CASE("Simple Adds")
     {
       SECTION(std::to_string(scenario.instruction_))
       {
+        cpu.reg_ = scenario.reg_precondition_;
+        cpu.flags_ = scenario.flag_precondition_;
+
         cpu.instruction_set_[scenario.instruction_].exp();
-        INFO("The instruction is " << static_cast<int>(scenario.instruction_));
-        REQUIRE(cpu.flags_ == scenario.flag_solution_);
-        REQUIRE(cpu.reg_ == scenario.reg_solution_);
+        INFO("The instruction is 0x"
+             << std::hex << static_cast<int>(scenario.instruction_));
+        REQUIRE(cpu.flags_ == scenario.flag_postcondition_);
+        REQUIRE(cpu.reg_ == scenario.reg_postcondition_);
       }
     }
   }
 
-  SECTION("Result is 11, z=0 s=0 p=0 ac=0 cy=0")
+  SECTION("Result is zero, z=1 s=? p=? ac=1 cy=1")
+  {
+    // Configure similar setup
+    for (auto &scenario : test_scenario.test_instructions_)
+    {
+      scenario.reg_precondition_ = {0, 1, 1, 1, 1, 1, 1, 0, 0};
+      scenario.reg_postcondition_ = {0, 1, 1, 1, 1, 1, 1, 0, 0};
+    }
+
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0xFF,
+                                                MOD_SCOPE::SETUP);
+
+    cpu.memory_[0x00] = 0x01;
+    test_scenario.modifyRegisterByInstruction(REG_NAME::H, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x86);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::L, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x86);
+
+    // Configure common solutions
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::PC, 1,
+                                                MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::CY, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::Z, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::P, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::AC, 1,
+                                            MOD_SCOPE::SOLUTION);
+
+    // Configure overrides
+    for (auto const &scenario : test_scenario.test_instructions_)
+    {
+      SECTION(std::to_string(scenario.instruction_))
+      {
+        cpu.reg_ = scenario.reg_precondition_;
+        cpu.flags_ = scenario.flag_precondition_;
+
+        cpu.instruction_set_[scenario.instruction_].exp();
+        INFO("The instruction is 0x"
+             << std::hex << static_cast<int>(scenario.instruction_));
+        REQUIRE(cpu.flags_ == scenario.flag_postcondition_);
+        REQUIRE(cpu.reg_ == scenario.reg_postcondition_);
+      }
+    }
+  }
+
+  // This set setup also checks that each addition has no side channel effects
+  // on other registers
+  SECTION("Result is 11 (except a), z=0 s=0 p=0 ac=0 cy=0")
   {
     // Configure similar setup
     test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 1,
@@ -84,11 +137,14 @@ TEST_CASE("Simple Adds")
     {
       SECTION(std::to_string(scenario.instruction_))
       {
-        cpu.reg_ = scenario.reg_setup_;
+        cpu.reg_ = scenario.reg_precondition_;
+        cpu.flags_ = scenario.flag_precondition_;
+
         cpu.instruction_set_[scenario.instruction_].exp();
-        INFO("The instruction is " << static_cast<int>(scenario.instruction_));
-        REQUIRE(cpu.flags_ == scenario.flag_solution_);
-        REQUIRE(cpu.reg_ == scenario.reg_solution_);
+        INFO("The instruction is 0x"
+             << std::hex << static_cast<int>(scenario.instruction_));
+        REQUIRE(cpu.flags_ == scenario.flag_postcondition_);
+        REQUIRE(cpu.reg_ == scenario.reg_postcondition_);
       }
     }
   }
