@@ -23,7 +23,7 @@ target_sources(test_8080
                  "test_8080_mem_mov.cpp"
                  "test_8080_reg_misc.cpp"
                  "test_memory.cpp")
-
+target_compile_features(test_8080 PRIVATE cxx_std_17)
 target_include_directories(test_8080
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../lib/include/
