@@ -159,8 +159,7 @@ void Cpu_8080::addMathSubOperations()
                   reg_.pc++;
                   cycle_count_ += 5;
                 }});
-  // TODO: Very important!! fix all dcx to be like dcx h, need to combine
-  // registr high with low by adding before subtracting
+
   instruction_set_.emplace_back(
     Instruction{0x2B, 0, "DCX H", [this]() {
                   unsigned int subtraction =

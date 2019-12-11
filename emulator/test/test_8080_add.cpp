@@ -123,6 +123,7 @@ TEST_CASE("Simple Adds")
     test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 11,
                                                 MOD_SCOPE::SOLUTION);
     cpu.memory_[0x00] = 0x0A;
+    cpu.memory_[0x01] = 0x0A;
 
     // Override specific variables
     test_scenario.modifyRegisterByInstruction(REG_NAME::B, 0x0A,
@@ -150,6 +151,8 @@ TEST_CASE("Simple Adds")
                                               MOD_SCOPE::SOLUTION, 0x87);
     test_scenario.modifyFlagByInstruction(FLAG_NAME::P, 0x01,
                                           MOD_SCOPE::SOLUTION, 0x87);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::PC, 0x02,
+                                              MOD_SCOPE::SOLUTION, 0xC6);
 
     for (auto const &scenario : test_scenario.test_instructions_)
     {
