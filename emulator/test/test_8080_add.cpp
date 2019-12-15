@@ -202,7 +202,7 @@ TEST_CASE("Simple Adds")
     runTests(cpu, test_scenario);
   }
 }
-/*
+
 TEST_CASE("Add Carry Flag")
 {
   Cpu_8080 cpu;
@@ -223,202 +223,89 @@ TEST_CASE("Add Carry Flag")
   test_scenario.addInstruction(0xCE);
 
   test_scenario.modifyCycleCountAllInstructions(4);
-  test_scenario.modifyCycleCountByInstruction(7, 0x86);
-  test_scenario.modifyCycleCountByInstruction(7, 0xC6);
+  test_scenario.modifyCycleCountByInstruction(7, 0x8E);
+  test_scenario.modifyCycleCountByInstruction(7, 0xCE);
   test_scenario.modifyRegisterAllInstructions(REG_NAME::PC, 1,
                                               MOD_SCOPE::SOLUTION);
-}
-*/
-TEST_CASE("Add Carry Flag", "[type]")
-{
-  Cpu_8080 cpu;
-  cpu.memory_.pushSegment(
-    {"rom", 0x2000, smart_memory::MemoryAttribute::READ_ONLY});
-  cpu.memory_.pushSegment(
-    {"ram", 0x400, smart_memory::MemoryAttribute::READ_WRITE});
-  cpu.memory_.pushSegment(
-    {"v_ram", 0x1600, smart_memory::MemoryAttribute::READ_WRITE});
-
-  SECTION("reg_ B")
+  test_scenario.modifyRegisterByInstruction(REG_NAME::PC, 0x02,
+                                            MOD_SCOPE::SOLUTION, 0xCE);
+  SECTION("Zero / Parity Flag Test")
   {
-    cpu.reg_.a = 0;
-    cpu.reg_.b = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-    cpu.instruction_set_[0x88].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.b == 0);
+    // Setup test
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::Z, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::P, 1,
+                                            MOD_SCOPE::SOLUTION);
+    cpu.memory_[0x01] = 0x00;
 
-    cpu.reg_.a = 10;
-    cpu.reg_.b = 10;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x88].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.b == 10);
-    REQUIRE(cpu.reg_.pc == 2);
+    runTests(cpu, test_scenario);
   }
 
-  SECTION("reg_ C")
+  SECTION("Test the carry flag is added")
   {
-    cpu.reg_.a = 0;
-    cpu.reg_.c = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
+    // Setup test
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::CY, 1, MOD_SCOPE::SETUP);
 
-    cpu.instruction_set_[0x89].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.c == 0);
+    // Setup Solution
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 1,
+                                                MOD_SCOPE::SOLUTION);
+    cpu.memory_[0x01] = 0x00;
 
-    cpu.reg_.a = 10;
-    cpu.reg_.c = 10;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x89].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.c == 10);
-    REQUIRE(cpu.reg_.pc == 2);
+    runTests(cpu, test_scenario);
   }
 
-  SECTION("reg_ D")
+  SECTION("Carry and Auxillary Carry Flag Test")
   {
-    cpu.reg_.a = 0;
-    cpu.reg_.d = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
+    // Configure similar setup
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::B, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::C, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::D, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::E, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::H, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::L, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::SP, 0,
+                                                MOD_SCOPE::SETUP_SOLUTION);
 
-    cpu.instruction_set_[0x8A].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.d == 0);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0xFF,
+                                                MOD_SCOPE::SETUP);
 
-    cpu.reg_.a = 10;
-    cpu.reg_.d = 10;
-    cpu.flags_.cy = 1;
+    cpu.memory_[0x00] = 0x01;
+    cpu.memory_[0x01] = 0x01;
+    test_scenario.modifyRegisterByInstruction(REG_NAME::H, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x8E);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::L, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x8E);
 
-    cpu.instruction_set_[0x8A].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.d == 10);
-    REQUIRE(cpu.reg_.pc == 2);
-  }
+    // Configure common solutions
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::CY, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::Z, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::P, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::AC, 1,
+                                            MOD_SCOPE::SOLUTION);
 
-  SECTION("reg_ E")
-  {
-    cpu.reg_.a = 0;
-    cpu.reg_.e = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-    cpu.instruction_set_[0x8B].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.e == 0);
+    // Configure overrides
+    // Need to override adding A to A, cant hit same flags on this as others
+    test_scenario.modifyFlagByInstruction(FLAG_NAME::Z, 0, MOD_SCOPE::SOLUTION,
+                                          0x8F);
+    test_scenario.modifyFlagByInstruction(FLAG_NAME::P, 0, MOD_SCOPE::SOLUTION,
+                                          0x8F);
+    test_scenario.modifyFlagByInstruction(FLAG_NAME::S, 1, MOD_SCOPE::SOLUTION,
+                                          0x8F);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::A, 0xFE,
+                                              MOD_SCOPE::SOLUTION, 0x8F);
 
-    cpu.reg_.a = 10;
-    cpu.reg_.e = 10;
-    cpu.flags_.cy = 1;
-    cpu.instruction_set_[0x8B].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.e == 10);
-    REQUIRE(cpu.reg_.pc == 2);
-  }
-
-  SECTION("reg_ H")
-  {
-    cpu.reg_.a = 0;
-    cpu.reg_.h = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-    cpu.instruction_set_[0x8C].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.h == 0);
-
-    cpu.reg_.a = 10;
-    cpu.reg_.h = 10;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8C].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.h == 10);
-    REQUIRE(cpu.reg_.pc == 2);
-  }
-
-  SECTION("reg_ L")
-  {
-    cpu.reg_.a = 0;
-    cpu.reg_.l = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8D].exp();
-    REQUIRE(cpu.reg_.a == 1);
-    REQUIRE(cpu.reg_.l == 0);
-
-    cpu.reg_.a = 10;
-    cpu.reg_.l = 10;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8D].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.l == 10);
-    REQUIRE(cpu.reg_.pc == 2);
-  }
-
-  SECTION("reg_ A")
-  {
-    cpu.reg_.a = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8F].exp();
-    REQUIRE(cpu.reg_.a == 1);
-
-    cpu.reg_.a = 10;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8F].exp();
-    REQUIRE(cpu.reg_.a == 21);
-    REQUIRE(cpu.reg_.pc == 2);
-  }
-
-  SECTION("Data")
-  {
-    cpu.memory_.flashReadOnlySegment("rom", {0x00, 0xFF, 0x01, 0xFE});
-    cpu.reg_.a = 0;
-    cpu.reg_.pc = 0;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0xCE].exp();
-    REQUIRE(cpu.reg_.pc == 0x02);
-    REQUIRE(cpu.reg_.a == 0x00);
-  }
-
-  SECTION("Memory")
-  {
-    cpu.memory_.flashReadOnlySegment("rom", {0x00, 0xFF, 0x01, 0xFE});
-    cpu.reg_.a = 0;
-    cpu.reg_.pc = 0;
-    cpu.reg_.h = 0;
-    cpu.reg_.l = 0;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8E].exp();
-    REQUIRE(cpu.reg_.a == 1);
-
-    cpu.reg_.a = 0;
-    cpu.reg_.h = 0;
-    cpu.reg_.l = 1;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8E].exp();
-    REQUIRE(cpu.reg_.a == 0x00);
-
-    cpu.reg_.a = 0xFF;
-    cpu.reg_.h = 0;
-    cpu.reg_.l = 2;
-    cpu.flags_.cy = 1;
-
-    cpu.instruction_set_[0x8E].exp();
-    REQUIRE(cpu.reg_.a == 0x01);
-
-    REQUIRE(cpu.reg_.pc == 3);
+    runTests(cpu, test_scenario);
   }
 }
 
