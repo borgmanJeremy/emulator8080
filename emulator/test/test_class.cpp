@@ -137,6 +137,25 @@ void TestConfig::modifyRegisterAllInstructions(REG_NAME reg, unsigned int value,
   }
 }
 
+void TestConfig::modifyCycleCountAllInstructions(unsigned int value)
+{
+  for (auto &instruction : test_instructions_)
+  {
+    instruction.cycle_count_postcondition_ = value;
+  }
+}
+void TestConfig::modifyCycleCountByInstruction(unsigned int value,
+                                               uint8_t instruction)
+{
+  for (auto &elem : test_instructions_)
+  {
+    if (elem.instruction_ == instruction)
+    {
+      elem.cycle_count_postcondition_ = value;
+    }
+  }
+}
+
 void TestConfig::modifyRegister(REG_NAME reg, unsigned int value, MOD_SCOPE mod,
                                 ScenarioGroup &elem)
 {

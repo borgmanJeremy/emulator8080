@@ -5,7 +5,7 @@
 # restrict analysis to files in this directory tree
 # this make it possible to only mutate certain parts of an application
 # use relative paths that are inside the root
-# restrict = []
+restrict = ["lib/"]
 
 [analyze]
 # exclude files in these directory tree(s) from analysis

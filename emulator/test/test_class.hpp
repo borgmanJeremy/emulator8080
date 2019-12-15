@@ -41,6 +41,7 @@ struct ScenarioGroup
   Registers reg_postcondition_;
   Flags flag_precondition_;
   Flags flag_postcondition_;
+  unsigned int cycle_count_postcondition_ = 0;
 };
 
 class TestConfig
@@ -49,6 +50,10 @@ class TestConfig
   TestConfig() = default;
 
   void addInstruction(uint8_t instruction);
+
+  void modifyCycleCountAllInstructions(unsigned int value);
+  void modifyCycleCountByInstruction(unsigned int value, uint8_t instruction);
+
   void modifyRegisterAllInstructions(REG_NAME reg, unsigned int value,
                                      MOD_SCOPE mod);
 
