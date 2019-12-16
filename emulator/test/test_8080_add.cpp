@@ -253,6 +253,52 @@ TEST_CASE("Add Carry Flag")
 
     runTests(cpu, test_scenario);
   }
+  SECTION("Sign Flag Test")
+  {
+    // Configure similar setup
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::B, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::C, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::D, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::E, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::H, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::L, 1,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::SP, 0,
+                                                MOD_SCOPE::SETUP_SOLUTION);
+
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0x7F,
+                                                MOD_SCOPE::SETUP);
+
+    test_scenario.modifyRegisterByInstruction(REG_NAME::A, 0x40,
+                                              MOD_SCOPE::SETUP, 0x8F);
+
+    // Configure test specific settings
+    cpu.memory_[0x00] = 0x01;
+    cpu.memory_[0x01] = 0x01;
+    test_scenario.modifyRegisterByInstruction(REG_NAME::H, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x8E);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::L, 0,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x8E);
+
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::A, 0x80,
+                                                MOD_SCOPE::SOLUTION);
+
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::S, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagAllInstructions(FLAG_NAME::AC, 1,
+                                            MOD_SCOPE::SOLUTION);
+    test_scenario.modifyFlagByInstruction(FLAG_NAME::AC, 0, MOD_SCOPE::SOLUTION,
+                                          0x8F);
+
+    runTests(cpu, test_scenario);
+  }
 
   SECTION("Carry and Auxillary Carry Flag Test")
   {
@@ -309,6 +355,58 @@ TEST_CASE("Add Carry Flag")
   }
 }
 
+TEST_CASE("Double Add")
+{
+  Cpu_8080 cpu;
+
+  cpu.memory_.pushSegment(
+    {"ram", 0x2000, smart_memory::MemoryAttribute::READ_WRITE});
+
+  TestConfig test_scenario;
+  test_scenario.addInstruction(0x09);
+  test_scenario.addInstruction(0x19);
+  test_scenario.addInstruction(0x29);
+  test_scenario.addInstruction(0x39);
+
+  test_scenario.modifyCycleCountAllInstructions(10);
+  test_scenario.modifyRegisterAllInstructions(REG_NAME::PC, 1,
+                                              MOD_SCOPE::SOLUTION);
+  // 0 = 0 + 0, but this instruction should not modify z or p flag
+  SECTION("Zero / Parity Flag Test")
+  {
+    // Setup test
+    runTests(cpu, test_scenario);
+  }
+  // 0x80 + 0x00, but this instruction should not modify S flag
+  SECTION("Sign Flag")
+  {
+    test_scenario.modifyRegisterByInstruction(REG_NAME::B, 0x80,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x09);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::C, 0x80,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x09);
+
+    test_scenario.modifyRegisterByInstruction(REG_NAME::D, 0x80,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x19);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::E, 0x80,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x19);
+
+    test_scenario.modifyRegisterByInstruction(REG_NAME::H, 0x40,
+                                              MOD_SCOPE::SETUP, 0x29);
+    test_scenario.modifyRegisterByInstruction(REG_NAME::L, 0x40,
+                                              MOD_SCOPE::SETUP, 0x29);
+
+    test_scenario.modifyRegisterByInstruction(REG_NAME::SP, 0x8080,
+                                              MOD_SCOPE::SETUP_SOLUTION, 0x39);
+
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::L, 0x80,
+                                                MOD_SCOPE::SOLUTION);
+    test_scenario.modifyRegisterAllInstructions(REG_NAME::H, 0x80,
+                                                MOD_SCOPE::SOLUTION);
+
+    runTests(cpu, test_scenario);
+  }
+}
+/*
 TEST_CASE("Double Add", "[type]")
 {
   Cpu_8080 cpu;
@@ -399,7 +497,7 @@ TEST_CASE("Double Add", "[type]")
     REQUIRE(cpu.reg_.pc == 0x01);
   }
 }
-
+*/
 TEST_CASE("DAA")
 {
   Cpu_8080 cpu;
